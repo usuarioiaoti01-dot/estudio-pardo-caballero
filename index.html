@@ -1,0 +1,2366 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Consultorias Integrales | Gestión de Tiempos</title>
+<style>
+:root{
+  --gold:#b8860b;--gold-lt:#fef3c7;
+  --navy:#1a2744;--navy-lt:#253660;
+  --bg:#f4f6f9;--card:#fff;--border:#dde3ed;
+  --text:#1a2744;--muted:#6b7280;
+  --green:#16a34a;--red:#dc2626;--amber:#d97706;--blue:#1d4ed8;
+  --purple:#7c3aed;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Segoe UI',sans-serif;background:var(--bg);color:var(--text);font-size:14px;}
+.header{background:var(--navy);color:#fff;padding:0 20px;display:flex;align-items:center;gap:14px;height:62px;border-bottom:3px solid var(--gold);}
+.logo{font-size:28px;}
+.htitle{flex:1;}
+.htitle h1{font-size:17px;font-weight:700;}
+.htitle p{font-size:11px;opacity:.7;}
+.nav{background:var(--navy-lt);display:flex;flex-wrap:wrap;border-bottom:1px solid rgba(255,255,255,.1);}
+.nav-btn{padding:11px 18px;color:rgba(255,255,255,.65);border:none;background:none;cursor:pointer;font-size:13px;font-weight:700;border-bottom:3px solid transparent;transition:all .2s;white-space:nowrap;}
+.nav-btn:hover{color:#fff;}
+.nav-btn.active{color:var(--gold);border-bottom-color:var(--gold);background:rgba(184,134,11,.08);}
+.sub-tabs{display:flex;gap:5px;margin-bottom:18px;flex-wrap:wrap;}
+.sub-tab{padding:7px 13px;border:1px solid var(--border);border-radius:6px;background:#fff;cursor:pointer;font-size:12px;font-weight:700;color:var(--muted);transition:all .2s;}
+.sub-tab:hover{border-color:var(--navy);color:var(--navy);}
+.sub-tab.active{background:var(--navy);color:#fff;border-color:var(--navy);}
+.main{padding:20px;max-width:1300px;margin:0 auto;}
+.card{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:18px;margin-bottom:18px;}
+.ch{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;padding-bottom:11px;border-bottom:1px solid var(--border);}
+.ct{font-size:15px;font-weight:700;color:var(--navy);}
+.fg{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.fg3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;}
+.fgr{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;align-items:flex-end;}
+.fgr .fgroup{min-width:130px;}
+.fgroup{display:flex;flex-direction:column;gap:5px;}
+.fgroup label{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.3px;}
+.fgroup input,.fgroup select,.fgroup textarea{border:1px solid var(--border);border-radius:6px;padding:7px 10px;font-size:13px;font-family:inherit;background:#fff;}
+.fgroup input:focus,.fgroup select:focus,.fgroup textarea:focus{outline:none;border-color:var(--navy);}
+.ff{grid-column:1/-1;}
+.btn{padding:7px 14px;border-radius:6px;border:none;cursor:pointer;font-size:12px;font-weight:700;display:inline-flex;align-items:center;gap:5px;transition:opacity .15s;}
+.btn:hover{opacity:.82;}
+.btn-navy{background:var(--navy);color:#fff;}
+.btn-green{background:var(--green);color:#fff;}
+.btn-red{background:var(--red);color:#fff;}
+.btn-amber{background:var(--amber);color:#fff;}
+.btn-gold{background:var(--gold);color:#fff;}
+.btn-purple{background:var(--purple);color:#fff;}
+.btn-out{background:transparent;border:1px solid var(--border);color:var(--text);}
+.btn-out:hover{border-color:var(--navy);color:var(--navy);opacity:1;}
+.btn-sm{padding:4px 9px;font-size:11px;}
+/* CRONÓMETRO */
+.timer-box{background:linear-gradient(135deg,var(--navy) 0%,var(--navy-lt) 100%);border-radius:12px;padding:36px 24px;text-align:center;color:#fff;margin-bottom:18px;}
+.timer-disp{font-size:72px;font-weight:800;font-family:monospace;letter-spacing:6px;margin:12px 0;transition:color .3s;}
+.timer-run{color:#4ade80;}
+.timer-pause{color:#fbbf24;}
+.timer-idle{color:#fff;}
+.tctrls{display:flex;gap:10px;justify-content:center;margin-top:16px;flex-wrap:wrap;}
+.timer-lbl{font-size:12px;opacity:.7;text-transform:uppercase;letter-spacing:1px;}
+.timer-info{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:20px;}
+.tinfo-box{background:rgba(255,255,255,.1);border-radius:8px;padding:12px;text-align:center;}
+.tinfo-val{font-size:20px;font-weight:800;}
+.tinfo-lbl{font-size:11px;opacity:.7;margin-top:2px;}
+/* TABLA */
+.tw{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;font-size:13px;}
+th{background:var(--navy);color:#fff;padding:9px 11px;text-align:left;font-size:11px;font-weight:700;white-space:nowrap;text-transform:uppercase;letter-spacing:.3px;}
+td{padding:8px 11px;border-bottom:1px solid var(--border);vertical-align:middle;}
+tr:hover td{background:#f8fafc;}
+tr:last-child td{border-bottom:none;}
+.tfoot-row td{font-weight:700;background:#f1f5f9;border-top:2px solid var(--border);}
+/* BADGES */
+.badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:700;}
+.b-hora{background:#dbeafe;color:#1d4ed8;}
+.b-fijo{background:#fef3c7;color:#d97706;}
+.b-cat{background:#e0e7ff;color:#312e81;}
+.b-green{background:#dcfce7;color:#16a34a;}
+.b-red{background:#fee2e2;color:#dc2626;}
+.b-amber{background:#fef3c7;color:#d97706;}
+.b-purple{background:#ede9fe;color:#7c3aed;}
+/* KPIs */
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;margin-bottom:22px;}
+.kpi{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:16px;text-align:center;position:relative;overflow:hidden;}
+.kpi::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:var(--gold);}
+.kpi-val{font-size:22px;font-weight:800;color:var(--navy);margin-bottom:4px;}
+.kpi-lbl{font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.3px;}
+.kpi-icon{font-size:20px;margin-bottom:4px;}
+/* RESUMEN CARDS */
+.res-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:18px;}
+.res-ab-card{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:14px;}
+.res-ab-name{font-weight:700;color:var(--navy);font-size:14px;}
+.res-ab-meta{font-size:12px;color:var(--muted);margin-top:2px;}
+.res-ab-stats{display:flex;gap:12px;margin-top:10px;}
+.res-stat{flex:1;background:#f8fafc;border-radius:6px;padding:8px;text-align:center;}
+.res-stat-val{font-size:16px;font-weight:800;color:var(--navy);}
+.res-stat-lbl{font-size:10px;color:var(--muted);font-weight:600;}
+/* MODAL */
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:999;align-items:center;justify-content:center;}
+.overlay.open{display:flex;}
+.modal{background:var(--card);border-radius:10px;padding:22px;width:90%;max-width:560px;max-height:90vh;overflow-y:auto;}
+.mh{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;}
+.mt{font-size:15px;font-weight:700;color:var(--navy);}
+.mf{display:flex;gap:8px;justify-content:flex-end;margin-top:18px;padding-top:14px;border-top:1px solid var(--border);}
+.x-btn{background:none;border:none;font-size:18px;cursor:pointer;color:var(--muted);padding:2px 6px;}
+.x-btn:hover{color:var(--red);}
+.check-list{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:6px;}
+.check-item{display:flex;align-items:center;gap:7px;padding:6px 8px;border:1px solid var(--border);border-radius:5px;cursor:pointer;font-size:13px;}
+.check-item:hover{border-color:var(--navy);}
+.acts{display:flex;gap:4px;flex-wrap:wrap;}
+/* RUC LOOKUP */
+.ruc-box{display:flex;gap:8px;align-items:flex-end;}
+.ruc-box input{flex:1;}
+.sunat-result{background:#f0fdf4;border:1px solid #86efac;border-radius:8px;padding:12px;margin-top:10px;font-size:13px;}
+.sunat-result.error{background:#fef2f2;border-color:#fca5a5;}
+.sunat-result.loading{background:#f0f9ff;border-color:#7dd3fc;}
+.sunat-row{display:flex;gap:8px;margin-bottom:4px;align-items:flex-start;}
+.sunat-lbl{font-weight:700;color:var(--muted);min-width:130px;font-size:12px;}
+.sunat-val{color:var(--text);}
+/* TIPO CLIENTE TOGGLE */
+.tipo-toggle{display:flex;gap:8px;margin-bottom:14px;}
+.tipo-btn{flex:1;padding:10px;border:2px solid var(--border);border-radius:7px;background:#fff;cursor:pointer;text-align:center;font-size:13px;font-weight:700;color:var(--muted);transition:all .2s;}
+.tipo-btn.active{border-color:var(--navy);background:var(--navy);color:#fff;}
+/* PROYECTO CARD */
+.proy-card{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:10px;}
+.proy-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;}
+.proy-name{font-weight:700;color:var(--navy);font-size:14px;}
+.proy-meta{font-size:12px;color:var(--muted);margin-top:2px;}
+/* TABS */
+.tab-content{display:none;}
+.tab-content.active{display:block;}
+.sub-c{display:none;}
+.sub-c.active{display:block;}
+.fin-sub-c{display:none;}
+.fin-sub-c.active{display:block;}
+.empty{text-align:center;padding:36px;color:var(--muted);font-style:italic;}
+.hint{font-size:12px;color:var(--muted);background:#f8fafc;border:1px dashed var(--border);border-radius:6px;padding:9px 11px;margin-bottom:12px;line-height:1.5;}
+.import-msg{font-size:12px;font-weight:700;margin-top:8px;color:var(--navy);}
+/* Anchos de columna proporcionales al dato (evita textos montados) */
+#fin-ingresos table.wide{min-width:1180px;}
+td.num,th.num{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums;}
+td.nowrap,th.nowrap{white-space:nowrap;}
+td.cli{min-width:200px;line-height:1.35;}
+td.desc{max-width:240px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+/* Evita desbordes horizontales dentro de los modales (selects largos, tablas) */
+.fg .fgroup{min-width:0;}
+.fgroup select{max-width:100%;}
+#liqItems input,#liqItems textarea{min-width:0;width:100%;}
+#liqItems td{padding:5px 6px;}
+.modal{overflow-x:hidden;}
+/* PORT BAR */
+.port-bar{background:var(--navy-lt);color:#fff;padding:8px 20px;display:flex;align-items:center;gap:14px;font-size:12px;flex-wrap:wrap;}
+.port-bar .port-msg{flex:1;opacity:.8;min-width:220px;}
+.backup-info{font-weight:600;white-space:nowrap;}
+/* AVISO EDICIÓN */
+.edit-banner{display:none;background:var(--gold-lt);border:1px solid var(--gold);border-radius:6px;padding:8px 12px;margin-bottom:12px;font-size:12px;font-weight:700;color:#92400e;align-items:center;justify-content:space-between;gap:10px;}
+.edit-banner.show{display:flex;}
+/* ESTADO SUNAT */
+.habido{color:var(--green);font-weight:700;}
+.no-habido{color:var(--red);font-weight:700;}
+@media(max-width:768px){
+  .fg,.fg3,.res-grid{grid-template-columns:1fr;}
+  .check-list{grid-template-columns:1fr;}
+  .kpi-grid{grid-template-columns:repeat(2,1fr);}
+  .timer-disp{font-size:48px;}
+  .timer-info{grid-template-columns:1fr 1fr;}
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="logo">⚖</div>
+  <div class="htitle">
+    <h1>Consultorias Integrales</h1>
+    <p>Sistema de Gestión de Tiempos, Clientes y Proyectos</p>
+  </div>
+  <div style="display:flex;gap:7px;flex-wrap:wrap;align-items:center">
+    <span id="userBox" style="display:none;font-size:12px;color:#fff;opacity:.9;font-weight:600"></span>
+    <button class="btn btn-gold" onclick="exportarDatos()">⬇ Exportar</button>
+    <button class="btn btn-out" style="color:#fff;border-color:rgba(255,255,255,.3)" onclick="document.getElementById('impInput').click()">⬆ Importar</button>
+    <input type="file" id="impInput" accept=".json" style="display:none" onchange="importarDatos(this)">
+    <button class="btn btn-out" id="btnLogout" style="display:none;color:#fff;border-color:rgba(255,255,255,.3)" onclick="doLogout()">🚪 Salir</button>
+  </div>
+</div>
+<div class="port-bar">
+  <span class="port-msg">☁️ <strong>Modo nube:</strong> los datos se guardan en línea y se comparten entre todos los usuarios autorizados. Los cambios se sincronizan automáticamente.</span>
+  <span class="backup-info" id="backupInfo"></span>
+</div>
+
+<!-- NAV PRINCIPAL -->
+<div class="nav">
+  <button class="nav-btn" data-tab="registro" onclick="showTab('registro',this)">📝 Registro</button>
+  <button class="nav-btn active" data-tab="resumen" onclick="showTab('resumen',this)">🏠 Resumen</button>
+  <button class="nav-btn" data-tab="reportes" onclick="showTab('reportes',this)">📊 Reportes</button>
+  <button class="nav-btn" data-tab="cronometro" onclick="showTab('cronometro',this)">⏱ Cronómetro</button>
+  <button class="nav-btn" data-tab="finanzas" onclick="showTab('finanzas',this)">💰 Ingresos y Gastos</button>
+  <button class="nav-btn" data-tab="liquidacion" onclick="showTab('liquidacion',this)">🧾 Liquidación</button>
+  <button class="nav-btn" data-tab="usuarios" onclick="showTab('usuarios',this)" style="display:none">👥 Usuarios</button>
+</div>
+
+<div class="main">
+
+<!-- ══════════════ TAB RESUMEN ══════════════ -->
+<div id="tab-resumen" class="tab-content active">
+  <div class="kpi-grid" id="kpiResumen"></div>
+  <div class="card">
+    <div class="ch"><span class="ct">👤 Estado por Abogado</span></div>
+    <div id="resAbogados"><p class="empty">No hay abogados registrados aún.</p></div>
+  </div>
+  <div class="card">
+    <div class="ch"><span class="ct">🕐 Últimos 10 registros</span></div>
+    <div class="tw">
+      <table>
+        <thead><tr><th>Fecha</th><th>Abogado</th><th>Actividad</th><th>Tarifa</th><th>Horas</th><th>Monto (S/)</th><th>Descripción</th></tr></thead>
+        <tbody id="bodyUltimos"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ TAB CRONÓMETRO ══════════════ -->
+<div id="tab-cronometro" class="tab-content">
+  <div class="timer-box">
+    <div class="timer-lbl">CRONÓMETRO ACTIVO</div>
+    <div class="timer-disp timer-idle" id="timerDisp">00:00:00</div>
+    <div style="font-size:13px;opacity:.6" id="timerStatus">Listo para iniciar</div>
+    <div class="tctrls">
+      <button class="btn btn-green" id="btnStart" onclick="startTimer()" style="font-size:14px;padding:10px 22px">▶ Iniciar</button>
+      <button class="btn btn-amber" id="btnPause" onclick="pauseTimer()" style="display:none;font-size:14px;padding:10px 22px">⏸ Pausar</button>
+      <button class="btn btn-navy" id="btnResume" onclick="resumeTimer()" style="display:none;font-size:14px;padding:10px 22px">▶ Reanudar</button>
+      <button class="btn btn-red" id="btnStop" onclick="stopTimer()" style="display:none;font-size:14px;padding:10px 22px">⏹ Detener</button>
+    </div>
+    <div class="timer-info">
+      <div class="tinfo-box"><div class="tinfo-val" id="timerHours">0.00</div><div class="tinfo-lbl">Horas</div></div>
+      <div class="tinfo-box"><div class="tinfo-val" id="timerMonto">S/ 0.00</div><div class="tinfo-lbl">Monto estimado</div></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="ch"><span class="ct">💾 Guardar tiempo cronometrado</span></div>
+    <div class="fg">
+      <div class="fgroup"><label>📅 Fecha *</label><input type="date" id="crFecha"></div>
+      <div class="fgroup"><label>👤 Abogado *</label><select id="crAbogado" onchange="crAutoTarifa()"><option value="">— Seleccionar —</option></select></div>
+      <div class="fgroup"><label>📋 Actividad *</label><select id="crActividad"><option value="">— Seleccionar —</option></select></div>
+      <div class="fgroup"><label>💰 Tarifa *</label><select id="crTarifa" onchange="crCalcMonto()"><option value="">— Seleccionar —</option></select></div>
+      <div class="fgroup"><label>🏢 Cliente</label><select id="crCliente" onchange="fillPrPorCli('crProyecto','crCliente')"><option value="">— Sin cliente —</option></select></div>
+      <div class="fgroup"><label>📁 Proyecto</label><select id="crProyecto"><option value="">— Sin proyecto —</option></select></div>
+      <div class="fgroup"><label>⏰ Horas registradas</label><input type="number" id="crHoras" step="0.01" readonly style="background:#f0f4f8;font-weight:700"></div>
+      <div class="fgroup"><label>💵 Monto (S/)</label><input type="number" id="crMonto" style="background:#f0f4f8"></div>
+      <div class="fgroup ff"><label>📝 Descripción</label><textarea id="crDesc" rows="2" placeholder="Detalle del trabajo..."></textarea></div>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:14px">
+      <button class="btn btn-green" onclick="guardarCronReg()">💾 Guardar registro</button>
+      <button class="btn btn-out" onclick="limpiarCron()">↩ Limpiar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ TAB FINANZAS (INGRESOS Y GASTOS) ══════════════ -->
+<div id="tab-finanzas" class="tab-content">
+  <div class="sub-tabs">
+    <button class="sub-tab active" onclick="showFinSub('ingresos',this)">📥 Ingresos (RHE)</button>
+    <button class="sub-tab" onclick="showFinSub('gastos',this)">📤 Gastos</button>
+  </div>
+
+  <!-- SUB INGRESOS -->
+  <div id="fin-ingresos" class="fin-sub-c active">
+    <div class="kpi-grid" id="kpiIngresos"></div>
+    <div class="card">
+      <div class="ch">
+        <span class="ct">📥 Ingresos — Recibos por Honorarios (RHE)</span>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          <button class="btn btn-purple" onclick="document.getElementById('xmlInput').click()">⬆ Importar recibos XML</button>
+          <input type="file" id="xmlInput" accept=".xml" multiple style="display:none" onchange="importarRHE(this)">
+          <button class="btn btn-navy" onclick="openIngreso()">+ Nuevo ingreso</button>
+          <button class="btn btn-green btn-sm" onclick="exportIngCSV()">⬇ CSV</button>
+        </div>
+      </div>
+      <div class="hint">
+        💡 <strong>Importar recibos:</strong> haz clic en <em>Importar recibos XML</em> y selecciona los archivos <strong>.xml</strong> de la carpeta
+        <code>RHE - Recibos por Honorarios\XML</code>. Puedes seleccionar todos a la vez (Ctrl+A). Cada mes vuelve a importar los nuevos recibos:
+        los ya cargados se detectan y se omiten automáticamente. Los recibos con «Revertido» en el nombre se marcan y no suman a los totales.
+      </div>
+      <div id="ingImportMsg" class="import-msg"></div>
+      <div class="fgr">
+        <div class="fgroup"><label>Año</label><select id="ingFAnio" onchange="renderIngresos()"><option value="">Todos los años</option></select></div>
+        <div class="fgroup"><label>Mes</label>
+          <select id="ingFMes" onchange="renderIngresos()">
+            <option value="">Todos</option><option value="01">Enero</option><option value="02">Febrero</option><option value="03">Marzo</option><option value="04">Abril</option><option value="05">Mayo</option><option value="06">Junio</option><option value="07">Julio</option><option value="08">Agosto</option><option value="09">Setiembre</option><option value="10">Octubre</option><option value="11">Noviembre</option><option value="12">Diciembre</option>
+          </select>
+        </div>
+        <div class="fgroup"><label>Cliente / RUC</label><input type="text" id="ingFCli" placeholder="Buscar..." oninput="renderIngresos()"></div>
+        <div class="fgroup"><label>Moneda</label>
+          <select id="ingFMoneda" onchange="renderIngresos()">
+            <option value="">Todas</option><option value="PEN">Soles (S/)</option><option value="USD">Dólares (US$)</option>
+          </select>
+        </div>
+        <div class="fgroup"><label>Estado</label>
+          <select id="ingFEstado" onchange="renderIngresos()">
+            <option value="">Todos</option><option value="Emitido">Emitido</option><option value="Pagado">Pagado</option><option value="Pendiente">Pendiente</option><option value="Revertido">Revertido</option>
+          </select>
+        </div>
+        <button class="btn btn-out" style="margin-top:18px" onclick="limpFiltIng()">✕ Limpiar</button>
+      </div>
+      <div class="tw">
+        <table class="wide">
+          <thead><tr><th class="nowrap">Nº Recibo</th><th class="nowrap">F. Emisión</th><th>Cliente / RUC</th><th>Descripción</th><th class="num">Bruto</th><th class="num">Retención 8%</th><th class="num">Neto</th><th class="nowrap">Estado</th><th class="nowrap">Moneda / Origen</th><th class="nowrap">Acciones</th></tr></thead>
+          <tbody id="bodyIng"></tbody>
+          <tfoot id="footIng"></tfoot>
+        </table>
+      </div>
+    </div>
+    <div class="card">
+      <div class="ch"><span class="ct">📆 Resumen de Ingresos por Mes</span></div>
+      <div class="tw">
+        <table>
+          <thead><tr><th>Mes</th><th class="num">Recibos</th><th class="num">Neto Soles (S/)</th><th class="num">Neto Dólares (US$)</th></tr></thead>
+          <tbody id="bodyIngMes"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- SUB GASTOS -->
+  <div id="fin-gastos" class="fin-sub-c">
+    <div class="kpi-grid" id="kpiGastos"></div>
+    <div class="card">
+      <div class="ch">
+        <span class="ct">📤 Registro de Gastos</span>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          <button class="btn btn-navy" onclick="openGasto()">+ Nuevo gasto</button>
+          <button class="btn btn-green btn-sm" onclick="exportGasCSV()">⬇ CSV</button>
+        </div>
+      </div>
+      <div class="fgr">
+        <div class="fgroup"><label>Año</label><select id="gasFAnio" onchange="renderGastos()"><option value="">Todos los años</option></select></div>
+        <div class="fgroup"><label>Mes</label>
+          <select id="gasFMes" onchange="renderGastos()">
+            <option value="">Todos</option><option value="01">Enero</option><option value="02">Febrero</option><option value="03">Marzo</option><option value="04">Abril</option><option value="05">Mayo</option><option value="06">Junio</option><option value="07">Julio</option><option value="08">Agosto</option><option value="09">Setiembre</option><option value="10">Octubre</option><option value="11">Noviembre</option><option value="12">Diciembre</option>
+          </select>
+        </div>
+        <div class="fgroup"><label>Semana</label><select id="gasFSem" onchange="renderGastos()"><option value="">Todas las semanas</option></select></div>
+        <div class="fgroup"><label>Categoría</label><select id="gasFCat" onchange="renderGastos()"><option value="">Todas</option></select></div>
+        <button class="btn btn-out" style="margin-top:18px" onclick="limpFiltGas()">✕ Limpiar</button>
+      </div>
+      <div class="tw">
+        <table>
+          <thead><tr><th>Fecha</th><th>Mes</th><th>Semana</th><th>Categoría</th><th>Descripción</th><th>Monto (S/)</th><th>Acciones</th></tr></thead>
+          <tbody id="bodyGas"></tbody>
+          <tfoot id="footGas"></tfoot>
+        </table>
+      </div>
+    </div>
+    <div class="res-grid">
+      <div class="card" style="margin-bottom:0">
+        <div class="ch"><span class="ct">📆 Gastos por Mes</span></div>
+        <div class="tw">
+          <table>
+            <thead><tr><th>Mes</th><th>Registros</th><th>Total (S/)</th></tr></thead>
+            <tbody id="bodyGasMes"></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="card" style="margin-bottom:0">
+        <div class="ch"><span class="ct">🗓 Gastos por Semana</span></div>
+        <div class="tw">
+          <table>
+            <thead><tr><th>Semana</th><th>Registros</th><th>Total (S/)</th></tr></thead>
+            <tbody id="bodyGasSem"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div><!-- /tab-finanzas -->
+
+<!-- ══════════════ TAB LIQUIDACIÓN ══════════════ -->
+<div id="tab-liquidacion" class="tab-content">
+  <div class="card">
+    <div class="ch"><span class="ct">🧾 Liquidaciones de honorarios</span><button class="btn btn-navy" onclick="openLiquidacion()">+ Nueva liquidación</button></div>
+    <div class="hint">Registra una liquidación por operación/servicio, según el modelo: detalle de <strong>fecha, descripción y tiempo</strong>, con <strong>valor hora</strong> y montos (total, retención 8% y monto a pagar). La empresa/persona se toma de los recibos por honorarios.</div>
+    <div class="tw">
+      <table style="min-width:820px">
+        <thead><tr><th>#</th><th>Asunto / Operación</th><th>Cliente</th><th class="nowrap">Fecha</th><th class="num">Total horas</th><th class="num">Monto total</th><th class="num">Monto a pagar</th><th>Acciones</th></tr></thead>
+        <tbody id="bodyLiqReg"></tbody>
+      </table>
+    </div>
+  </div>
+</div><!-- /tab-liquidacion -->
+
+<!-- ══════════════ TAB USUARIOS ══════════════ -->
+<div id="tab-usuarios" class="tab-content">
+  <div class="card">
+    <div class="ch"><span class="ct">👥 Administración de Usuarios</span><button class="btn btn-navy" onclick="openUsuario()">+ Nuevo usuario</button></div>
+    <div class="hint">Crea usuarios con una <strong>clave temporal</strong> (deberán cambiarla en su primer ingreso) y asígnales un <strong>perfil</strong> que limita a qué secciones acceden. Requiere que la función <code>admin-users</code> esté desplegada en Supabase.</div>
+    <div id="usuMsg" class="import-msg"></div>
+    <div class="tw">
+      <table style="min-width:720px">
+        <thead><tr><th>Correo</th><th>Nombre</th><th>Perfil</th><th>Estado</th><th class="nowrap">Último ingreso</th><th>Acciones</th></tr></thead>
+        <tbody id="bodyUsu"></tbody>
+      </table>
+    </div>
+  </div>
+</div><!-- /tab-usuarios -->
+
+<!-- ══════════════ TAB REGISTRO ══════════════ -->
+<div id="tab-registro" class="tab-content">
+  <div class="sub-tabs">
+    <button class="sub-tab active" onclick="showSub('reg-clientes',this)">🏢 Registro de Clientes</button>
+    <button class="sub-tab" onclick="showSub('reg-abogados',this)">👤 Registro de Abogados</button>
+    <button class="sub-tab" onclick="showSub('reg-actividades',this)">📋 Registro de Actividades</button>
+    <button class="sub-tab" onclick="showSub('reg-proyectos',this)">📁 Registro de Proyectos</button>
+    <button class="sub-tab" onclick="showSub('reg-tiempo',this)">🕒 Registro Horas Manual</button>
+  </div>
+
+  <!-- SUB ABOGADOS -->
+  <div id="sub-reg-abogados" class="sub-c">
+    <div class="card">
+      <div class="ch"><span class="ct">👤 Registro de Abogados</span><button class="btn btn-navy" onclick="openAbogado()">+ Nuevo abogado</button></div>
+      <div class="tw">
+        <table>
+          <thead><tr><th>#</th><th>Nombre</th><th>Especialidad</th><th>Email</th><th>Teléfono</th><th>Tarifa</th><th>Acciones</th></tr></thead>
+          <tbody id="bodyAb"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- SUB ACTIVIDADES -->
+  <div id="sub-reg-actividades" class="sub-c">
+    <div class="card">
+      <div class="ch"><span class="ct">📋 Registro de Actividades</span><button class="btn btn-navy" onclick="openActividad()">+ Nueva actividad</button></div>
+      <div class="tw">
+        <table>
+          <thead><tr><th>#</th><th>Nombre</th><th>Categoría</th><th>Fecha</th><th>Horas</th><th>Descripción</th><th>Acciones</th></tr></thead>
+          <tbody id="bodyAct"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- SUB TARIFAS -->
+  <div id="sub-reg-tarifas" class="sub-c">
+    <div class="card">
+      <div class="ch"><span class="ct">💰 Registro de Tarifas</span><button class="btn btn-navy" onclick="openTarifa()">+ Nueva tarifa</button></div>
+      <div class="tw">
+        <table>
+          <thead><tr><th>#</th><th>Nombre</th><th>Tipo</th><th>Valor (S/)</th><th>Descripción</th><th>Asignada a</th><th>Acciones</th></tr></thead>
+          <tbody id="bodyTar"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- SUB CLIENTES -->
+  <div id="sub-reg-clientes" class="sub-c active">
+    <div class="card">
+      <div class="ch"><span class="ct">🏢 Registro de Clientes</span><button class="btn btn-navy" onclick="openCliente()">+ Nuevo cliente</button></div>
+      <div class="fgr">
+        <div class="fgroup"><label>Buscar</label><input type="text" id="filtBusqCli" placeholder="Nombre, RUC..." oninput="renderClientes()"></div>
+        <div class="fgroup"><label>Tipo</label>
+          <select id="filtTipoCli" onchange="renderClientes()">
+            <option value="">Todos</option>
+            <option value="empresa">Empresa</option>
+            <option value="persona">Persona natural</option>
+          </select>
+        </div>
+        <button class="btn btn-out" style="margin-top:18px" onclick="limpFiltCli()">✕ Limpiar</button>
+      </div>
+      <div class="tw">
+        <table>
+          <thead><tr><th>#</th><th>Código</th><th>Tipo</th><th>RUC / DNI</th><th>Razón Social / Nombre</th><th>Estado SUNAT</th><th>Tipo Contribuyente</th><th>Dirección</th><th>Contacto</th><th>Abogado</th><th>Tarifa</th><th>Acciones</th></tr></thead>
+          <tbody id="bodyCli"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- SUB PROYECTOS -->
+  <div id="sub-reg-proyectos" class="sub-c">
+    <div class="card">
+      <div class="ch"><span class="ct">📁 Registro de Proyectos y Trabajos</span><button class="btn btn-navy" onclick="openProyecto()">+ Nuevo proyecto</button></div>
+      <div class="fgr">
+        <div class="fgroup"><label>Buscar</label><input type="text" id="filtBusqProy" placeholder="Nombre proyecto..." oninput="renderProyectos()"></div>
+        <div class="fgroup"><label>Cliente</label><select id="filtCliProy" onchange="renderProyectos()"><option value="">Todos</option></select></div>
+        <div class="fgroup"><label>Estado</label>
+          <select id="filtEstProy" onchange="renderProyectos()">
+            <option value="">Todos</option>
+            <option value="Activo">Activo</option>
+            <option value="Finalizado">Finalizado</option>
+            <option value="Suspendido">Suspendido</option>
+            <option value="Pendiente">Pendiente</option>
+          </select>
+        </div>
+        <button class="btn btn-out" style="margin-top:18px" onclick="limpFiltProy()">✕ Limpiar</button>
+      </div>
+      <div class="tw">
+        <table>
+          <thead><tr><th>#</th><th>Proyecto / Trabajo</th><th>Cliente</th><th>Descripción</th><th>F. Inicio</th><th>F. Fin</th><th>Estado</th><th>Monto (S/)</th><th>Acciones</th></tr></thead>
+          <tbody id="bodyProy"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- SUB HORAS MANUAL -->
+  <div id="sub-reg-tiempo" class="sub-c">
+    <div class="card">
+      <div class="ch"><span class="ct">🕒 Registro Horas Manual</span></div>
+      <div class="edit-banner" id="regEditBanner">
+        <span>✏ Editando un registro existente. Guarda para aplicar los cambios.</span>
+        <button class="btn btn-out btn-sm" onclick="limpiarReg()">Cancelar edición</button>
+      </div>
+      <div class="fg">
+        <div class="fgroup"><label>📅 Fecha *</label><input type="date" id="rFecha"></div>
+        <div class="fgroup"><label>👤 Abogado *</label><select id="rAbogado" onchange="autoTarifa()"><option value="">— Seleccionar —</option></select></div>
+        <div class="fgroup"><label>📋 Actividad *</label><select id="rActividad"><option value="">— Seleccionar —</option></select></div>
+        <div class="fgroup"><label>💰 Tarifa *</label><select id="rTarifa" onchange="calcMonto()"><option value="">— Seleccionar —</option></select></div>
+        <div class="fgroup"><label>🏢 Cliente</label><select id="rCliente" onchange="fillPrPorCli('rProyecto','rCliente')"><option value="">— Sin cliente —</option></select></div>
+        <div class="fgroup"><label>📁 Proyecto</label><select id="rProyecto"><option value="">— Sin proyecto —</option></select></div>
+        <div class="fgroup"><label>⏰ Horas trabajadas *</label><input type="number" id="rHoras" min="0" step="0.25" placeholder="ej. 1.5" oninput="calcMonto()"></div>
+        <div class="fgroup"><label>💵 Monto (S/)</label><input type="number" id="rMonto" placeholder="0.00" style="background:#f8fafc"></div>
+        <div class="fgroup ff"><label>📝 Descripción</label><textarea id="rDesc" rows="2" placeholder="Detalle del trabajo realizado..."></textarea></div>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:14px">
+        <button class="btn btn-navy" onclick="guardarReg()" id="btnGuardarReg">💾 Guardar registro</button>
+        <button class="btn btn-out" onclick="limpiarReg()">↩ Limpiar</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="ch"><span class="ct">📋 Registros de Horas Manuales</span><button class="btn btn-green btn-sm" onclick="exportRegCSV()">⬇ CSV</button></div>
+      <div class="fgr">
+        <div class="fgroup"><label>Desde</label><input type="date" id="fDesde" oninput="renderRegs()"></div>
+        <div class="fgroup"><label>Hasta</label><input type="date" id="fHasta" oninput="renderRegs()"></div>
+        <div class="fgroup"><label>Abogado</label><select id="fAbReg" onchange="renderRegs()"><option value="">Todos</option></select></div>
+        <button class="btn btn-out" style="margin-top:18px" onclick="limpFiltReg()">✕ Limpiar</button>
+      </div>
+      <div class="tw">
+        <table>
+          <thead><tr><th>Fecha</th><th>Abogado</th><th>Actividad</th><th>Cliente</th><th>Proyecto</th><th>Tarifa</th><th>Horas</th><th>Monto (S/)</th><th>Descripción</th><th>Acciones</th></tr></thead>
+          <tbody id="bodyRegs"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div><!-- /tab-registro -->
+
+<!-- ══════════════ TAB REPORTES ══════════════ -->
+<div id="tab-reportes" class="tab-content">
+  <div class="kpi-grid" id="kpiReportes"></div>
+  <div class="card">
+    <div class="ch"><span class="ct">📊 Reporte General de Tiempos</span><button class="btn btn-green btn-sm" onclick="exportRepCSV()">⬇ Exportar CSV</button></div>
+    <div class="fgr">
+      <div class="fgroup"><label>Desde</label><input type="date" id="rpDesde" oninput="renderRep()"></div>
+      <div class="fgroup"><label>Hasta</label><input type="date" id="rpHasta" oninput="renderRep()"></div>
+      <div class="fgroup"><label>Abogado</label><select id="rpAb" onchange="renderRep()"><option value="">Todos</option></select></div>
+      <div class="fgroup"><label>Actividad</label><select id="rpAct" onchange="renderRep()"><option value="">Todas</option></select></div>
+      <div class="fgroup"><label>Cliente</label><select id="rpCli" onchange="renderRep()"><option value="">Todos</option></select></div>
+      <div class="fgroup"><label>Tipo entrada</label>
+        <select id="rpTipo" onchange="renderRep()">
+          <option value="">Todos</option><option value="manual">Manual</option><option value="timer">Cronómetro</option>
+        </select>
+      </div>
+      <button class="btn btn-out" style="margin-top:18px" onclick="limpFiltRep()">✕ Limpiar</button>
+    </div>
+    <div class="tw">
+      <table>
+        <thead><tr><th>Fecha</th><th>Abogado</th><th>Actividad</th><th>Cliente</th><th>Proyecto</th><th>Tarifa</th><th>Horas</th><th>Monto (S/)</th><th>Tipo</th></tr></thead>
+        <tbody id="bodyRep"></tbody>
+        <tfoot id="footRep"></tfoot>
+      </table>
+    </div>
+  </div>
+  <div class="card">
+    <div class="ch"><span class="ct">👤 Resumen por Abogado</span></div>
+    <div class="tw">
+      <table>
+        <thead><tr><th>Abogado</th><th>Especialidad</th><th>Registros</th><th>Total Horas</th><th>Total Facturado (S/)</th></tr></thead>
+        <tbody id="bodyResAb"></tbody>
+      </table>
+    </div>
+  </div>
+  <div class="card">
+    <div class="ch"><span class="ct">🏢 Resumen por Cliente</span></div>
+    <div class="tw">
+      <table>
+        <thead><tr><th>Cliente</th><th>RUC/DNI</th><th>Proyectos</th><th>Registros</th><th>Total Horas</th><th>Total Facturado (S/)</th></tr></thead>
+        <tbody id="bodyResCli"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+</div><!-- /main -->
+
+<!-- ══════════ MODALES ══════════ -->
+
+<!-- Modal Abogado -->
+<div class="overlay" id="ovAbogado">
+  <div class="modal">
+    <div class="mh"><span class="mt" id="titAbogado">Nuevo Abogado</span><button class="x-btn" onclick="cancelAbogado()">✕</button></div>
+    <div class="fg">
+      <div class="fgroup ff"><label>Nombre completo *</label><input type="text" id="abNom" placeholder="Dr. Juan Pérez Ruiz"></div>
+      <div class="fgroup"><label>Especialidad</label><input type="text" id="abEsp" placeholder="Derecho Civil"></div>
+      <div class="fgroup"><label>Email</label><input type="email" id="abEmail" placeholder="correo@ejemplo.com"></div>
+      <div class="fgroup"><label>Teléfono</label><input type="tel" id="abTel" placeholder="999 999 999"></div>
+      <div class="fgroup"><label>Tarifa</label><div style="display:flex;gap:6px"><select id="abTarDef" style="flex:1"><option value="">— Ninguna —</option></select><button type="button" class="btn btn-out btn-sm" onclick="nuevaTarifaDesdeAbogado()" title="Registrar y asignar una nueva tarifa">➕ Tarifa</button></div></div>
+    </div>
+    <input type="hidden" id="abId">
+    <div class="mf"><button class="btn btn-out" onclick="cancelAbogado()">Cancelar</button><button class="btn btn-navy" onclick="saveAbogado()">💾 Guardar</button></div>
+  </div>
+</div>
+
+<!-- Modal Actividad -->
+<div class="overlay" id="ovActividad">
+  <div class="modal">
+    <div class="mh"><span class="mt" id="titActividad">Nueva Actividad</span><button class="x-btn" onclick="closeOv('ovActividad')">✕</button></div>
+    <div class="fg">
+      <div class="fgroup ff"><label>Nombre *</label><input type="text" id="actNom" placeholder="Ej. Redacción de contrato"></div>
+      <div class="fgroup"><label>Categoría</label>
+        <select id="actCat"><option>Litigios</option><option>Consultoría</option><option>Redacción</option><option>Reunión</option><option>Investigación</option><option>Notarial</option><option>Administrativa</option><option>Otro</option></select>
+      </div>
+      <div class="fgroup"><label>📅 Fecha</label><input type="date" id="actFecha"></div>
+      <div class="fgroup"><label>⏰ Horas trabajadas</label><input type="number" id="actHoras" min="0" step="0.25" placeholder="ej. 1.5"></div>
+      <div class="fgroup ff"><label>Descripción</label><textarea id="actDesc" rows="2" placeholder="Descripción..."></textarea></div>
+    </div>
+    <input type="hidden" id="actId">
+    <div class="mf"><button class="btn btn-out" onclick="closeOv('ovActividad')">Cancelar</button><button class="btn btn-navy" onclick="saveActividad()">💾 Guardar</button></div>
+  </div>
+</div>
+
+<!-- Modal Tarifa -->
+<div class="overlay" id="ovTarifa">
+  <div class="modal">
+    <div class="mh"><span class="mt" id="titTarifa">Nueva Tarifa</span><button class="x-btn" onclick="cancelarTarifa()">✕</button></div>
+    <div class="fg">
+      <div class="fgroup ff"><label>Nombre *</label><input type="text" id="tarNom" placeholder="Ej. Hora Socio Principal"></div>
+      <div class="fgroup"><label>Tipo *</label><select id="tarTipo"><option value="hora">Por hora</option><option value="fijo">Monto fijo</option></select></div>
+      <div class="fgroup"><label>Valor (S/) *</label><input type="number" id="tarVal" min="0" step="0.01" placeholder="0.00"></div>
+      <div class="fgroup ff"><label>Descripción</label><textarea id="tarDesc" rows="2" placeholder="Descripción..."></textarea></div>
+      <div class="fgroup ff">
+        <label>Asignar a abogados</label>
+        <div class="check-list" id="tarAbList"></div>
+      </div>
+    </div>
+    <input type="hidden" id="tarId">
+    <div class="mf"><button class="btn btn-out" onclick="cancelarTarifa()">Cancelar</button><button class="btn btn-navy" onclick="saveTarifa()">💾 Guardar</button></div>
+  </div>
+</div>
+
+<!-- Modal Cliente -->
+<div class="overlay" id="ovCliente">
+  <div class="modal" style="max-width:620px">
+    <div class="mh"><span class="mt" id="titCliente">Nuevo Cliente</span><button class="x-btn" onclick="closeOv('ovCliente')">✕</button></div>
+    <div style="margin-bottom:14px">
+      <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:6px">Tipo de cliente *</label>
+      <div class="tipo-toggle">
+        <div class="tipo-btn active" id="tipoBtnEmp" onclick="setTipoCliente('empresa')">🏢 Empresa / Persona Jurídica</div>
+        <div class="tipo-btn" id="tipoBtnPer" onclick="setTipoCliente('persona')">👤 Persona Natural</div>
+      </div>
+    </div>
+    <!-- RUC LOOKUP -->
+    <div class="fgroup" style="margin-bottom:14px">
+      <label id="rucLabel">RUC (11 dígitos) *</label>
+      <div class="ruc-box">
+        <input type="text" id="cliRuc" placeholder="Ej. 20123456789" maxlength="11" oninput="this.value=this.value.replace(/\D/g,'')">
+        <button class="btn btn-purple" onclick="consultarRUC()" id="btnConsultaRuc">🔍 Consultar SUNAT</button>
+        <a id="linkSunat" href="#" target="_blank" rel="noopener" style="display:none">
+          <button type="button" class="btn btn-out btn-sm">🌐 Abrir SUNAT</button>
+        </a>
+      </div>
+      <div id="sunatResult" style="margin-top:8px"></div>
+    </div>
+    <div class="fg">
+      <div class="fgroup"><label>Código de cliente</label><input type="text" id="cliCodigo" readonly style="background:#f0f4f8;font-weight:700" placeholder="(automático)"></div>
+      <div class="fgroup ff"><label id="razonLabel">Razón Social / Nombre *</label><input type="text" id="cliRazon" placeholder="Nombre o razón social"></div>
+      <div class="fgroup"><label>Estado SUNAT</label><input type="text" id="cliEstado" placeholder="Habido / No Habido"></div>
+      <div class="fgroup"><label>Tipo Contribuyente</label><input type="text" id="cliTipoContrib" placeholder="Ej. Sociedad Anónima Cerrada"></div>
+      <div class="fgroup ff"><label>Dirección fiscal</label><input type="text" id="cliDir" placeholder="Dirección registrada en SUNAT"></div>
+      <div class="fgroup"><label>Teléfono / Celular</label><input type="tel" id="cliTel" placeholder="999 999 999"></div>
+      <div class="fgroup"><label>Email</label><input type="email" id="cliEmail" placeholder="correo@empresa.com"></div>
+      <div class="fgroup"><label>Persona de contacto</label><input type="text" id="cliContacto" placeholder="Nombre del contacto"></div>
+      <div class="fgroup"><label>Tarifa — Tipo</label><select id="cliTarTipo"><option value="hora">Por hora</option><option value="fijo">Monto fijo</option></select></div>
+      <div class="fgroup"><label>Tarifa — Valor (S/)</label><input type="number" id="cliTarValor" min="0" step="0.01" placeholder="0.00"></div>
+      <div class="fgroup ff"><label>Abogado asignado</label><div style="display:flex;gap:6px"><select id="cliAbogado" style="flex:1"><option value="">— Sin asignar —</option></select><button type="button" class="btn btn-out btn-sm" onclick="nuevoAbogadoDesdeCliente()" title="Registrar y asignar un nuevo abogado">➕ Abogado</button></div></div>
+      <div class="fgroup ff"><label>Notas adicionales</label><textarea id="cliNotas" rows="2" placeholder="Observaciones..."></textarea></div>
+    </div>
+    <input type="hidden" id="cliId">
+    <input type="hidden" id="cliTipo" value="empresa">
+    <div class="mf"><button class="btn btn-out" onclick="closeOv('ovCliente')">Cancelar</button><button class="btn btn-navy" onclick="saveCliente()">💾 Guardar</button></div>
+  </div>
+</div>
+
+<!-- Modal Proyecto -->
+<div class="overlay" id="ovProyecto">
+  <div class="modal" style="max-width:600px">
+    <div class="mh"><span class="mt" id="titProyecto">Nuevo Proyecto / Trabajo</span><button class="x-btn" onclick="closeOv('ovProyecto')">✕</button></div>
+    <div class="fg">
+      <div class="fgroup ff"><label>Nombre del proyecto / trabajo *</label><input type="text" id="proyNom" placeholder="Ej. Asesoría contrato de arrendamiento"></div>
+      <div class="fgroup ff"><label>Cliente *</label><select id="proyCliente"><option value="">— Seleccionar cliente —</option></select></div>
+      <div class="fgroup ff"><label>Descripción</label><textarea id="proyDesc" rows="2" placeholder="Descripción del trabajo contratado..."></textarea></div>
+      <div class="fgroup"><label>Fecha inicio</label><input type="date" id="proyFini"></div>
+      <div class="fgroup"><label>Fecha fin estimada</label><input type="date" id="proyFfin"></div>
+      <div class="fgroup"><label>Estado *</label>
+        <select id="proyEstado">
+          <option value="Activo">Activo</option>
+          <option value="Pendiente">Pendiente</option>
+          <option value="Finalizado">Finalizado</option>
+          <option value="Suspendido">Suspendido</option>
+        </select>
+      </div>
+      <div class="fgroup"><label>Monto contratado (S/)</label><input type="number" id="proyMonto" min="0" step="0.01" placeholder="0.00"></div>
+      <div class="fgroup"><label>Abogado responsable</label><select id="proyAbogado"><option value="">— Sin asignar —</option></select></div>
+      <div class="fgroup ff"><label>Notas / Observaciones</label><textarea id="proyNotas" rows="2" placeholder="Notas adicionales..."></textarea></div>
+    </div>
+    <input type="hidden" id="proyId">
+    <div class="mf"><button class="btn btn-out" onclick="closeOv('ovProyecto')">Cancelar</button><button class="btn btn-navy" onclick="saveProyecto()">💾 Guardar</button></div>
+  </div>
+</div>
+
+<!-- Modal Ingreso -->
+<div class="overlay" id="ovIngreso">
+  <div class="modal" style="max-width:600px">
+    <div class="mh"><span class="mt" id="titIngreso">Nuevo Ingreso</span><button class="x-btn" onclick="closeOv('ovIngreso')">✕</button></div>
+    <div class="fg">
+      <div class="fgroup"><label>Nº Recibo (serie-correlativo)</label><input type="text" id="ingNumero" placeholder="Ej. E001-160"></div>
+      <div class="fgroup"><label>Fecha de emisión *</label><input type="date" id="ingFecha"></div>
+      <div class="fgroup"><label>RUC del cliente</label><input type="text" id="ingRuc" placeholder="Ej. 20121910731"></div>
+      <div class="fgroup"><label>Cliente / Receptor</label><input type="text" id="ingCliente" placeholder="Razón social"></div>
+      <div class="fgroup ff"><label>Descripción del servicio</label><textarea id="ingDesc" rows="2" placeholder="Ej. Servicios legales brindados en..."></textarea></div>
+      <div class="fgroup"><label>Renta Bruta *</label><input type="number" id="ingBruto" min="0" step="0.01" placeholder="0.00" oninput="ingBrutoChg()"></div>
+      <div class="fgroup"><label>Retención 8%</label><input type="number" id="ingRet" min="0" step="0.01" placeholder="0.00" oninput="ingRetChg()"></div>
+      <div class="fgroup"><label>Neto cobrado</label><input type="number" id="ingNeto" step="0.01" readonly style="background:#f0f4f8;font-weight:700"></div>
+      <div class="fgroup"><label>Moneda</label><select id="ingMoneda"><option value="PEN">Soles (PEN)</option><option value="USD">Dólares (USD)</option></select></div>
+      <div class="fgroup"><label>Estado</label>
+        <select id="ingEstado"><option value="Emitido">Emitido</option><option value="Pagado">Pagado</option><option value="Pendiente">Pendiente de pago</option><option value="Revertido">Revertido</option></select>
+      </div>
+      <div class="fgroup ff"><label>Notas</label><textarea id="ingNotas" rows="2" placeholder="Observaciones..."></textarea></div>
+    </div>
+    <input type="hidden" id="ingId">
+    <div class="mf"><button class="btn btn-out" onclick="closeOv('ovIngreso')">Cancelar</button><button class="btn btn-navy" onclick="saveIngreso()">💾 Guardar</button></div>
+  </div>
+</div>
+
+<!-- Modal Gasto -->
+<div class="overlay" id="ovGasto">
+  <div class="modal" style="max-width:520px">
+    <div class="mh"><span class="mt" id="titGasto">Nuevo Gasto</span><button class="x-btn" onclick="closeOv('ovGasto')">✕</button></div>
+    <div class="fg">
+      <div class="fgroup"><label>Fecha *</label><input type="date" id="gasFecha"></div>
+      <div class="fgroup"><label>Categoría *</label><select id="gasCat"></select></div>
+      <div class="fgroup"><label>Monto (S/) *</label><input type="number" id="gasMonto" min="0" step="0.01" placeholder="0.00"></div>
+      <div class="fgroup ff"><label>Descripción</label><textarea id="gasDesc" rows="2" placeholder="Detalle del gasto..."></textarea></div>
+      <div class="fgroup ff"><label>Notas</label><textarea id="gasNotas" rows="2" placeholder="Observaciones..."></textarea></div>
+    </div>
+    <input type="hidden" id="gasId">
+    <div class="mf"><button class="btn btn-out" onclick="closeOv('ovGasto')">Cancelar</button><button class="btn btn-navy" onclick="saveGasto()">💾 Guardar</button></div>
+  </div>
+</div>
+
+<!-- Modal LOGIN -->
+<div class="overlay open" id="ovLogin" style="z-index:2000;background:rgba(26,39,68,.92)">
+  <div class="modal" style="max-width:380px">
+    <div style="text-align:center;margin-bottom:16px">
+      <div style="font-size:38px;line-height:1">⚖</div>
+      <div style="font-weight:800;color:var(--navy);font-size:16px;margin-top:4px">Consultorias Integrales</div>
+      <div style="font-size:12px;color:var(--muted)">Acceso al sistema</div>
+    </div>
+    <div class="fgroup" style="margin-bottom:10px"><label>Correo</label><input type="email" id="loginEmail" placeholder="usuario@correo.com" onkeydown="if(event.key==='Enter')doLogin()"></div>
+    <div class="fgroup" style="margin-bottom:14px"><label>Contraseña</label><input type="password" id="loginPass" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()"></div>
+    <button class="btn btn-navy" id="btnLogin" style="width:100%;justify-content:center" onclick="doLogin()">Ingresar</button>
+    <div id="loginMsg" style="font-size:12px;margin-top:12px;text-align:center;color:var(--muted)">Conectando...</div>
+  </div>
+</div>
+
+<!-- Modal Liquidación -->
+<div class="overlay" id="ovLiquidacion">
+  <div class="modal" style="max-width:720px">
+    <div class="mh"><span class="mt" id="titLiquidacion">Nueva Liquidación</span><button class="x-btn" onclick="closeOv('ovLiquidacion')">✕</button></div>
+    <div class="fg">
+      <div class="fgroup ff"><label>Asunto / Operación *</label><input type="text" id="liqAsunto" placeholder="Ej. Compra venta de inmueble en San Borja"></div>
+      <div class="fgroup"><label>Empresa / Persona (receptor) *</label><select id="liqRecep" onchange="liqRecalc()"><option value="">— Seleccionar —</option></select></div>
+      <div class="fgroup"><label>Valor hora (S/)</label><input type="number" id="liqValorHora" min="0" step="0.01" placeholder="0.00" oninput="liqRecalc()"></div>
+    </div>
+    <div style="margin:12px 0 6px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px">
+      <strong style="font-size:13px;color:var(--navy)">Detalle (fecha · descripción · tiempo)</strong>
+      <div style="display:flex;gap:6px">
+        <button type="button" class="btn btn-out btn-sm" onclick="liqTraerHoras()">↧ Traer horas registradas</button>
+        <button type="button" class="btn btn-navy btn-sm" onclick="liqAddItem()">+ Agregar fila</button>
+      </div>
+    </div>
+    <div class="tw">
+      <table style="width:100%;table-layout:fixed">
+        <thead><tr><th style="width:120px">Fecha</th><th>Descripción</th><th style="width:90px">Horas</th><th style="width:34px"></th></tr></thead>
+        <tbody id="liqItems"></tbody>
+      </table>
+    </div>
+    <div class="fg" style="margin-top:14px">
+      <div class="fgroup"><label>Total horas</label><input type="text" id="liqTotHoras" readonly style="background:#f0f4f8;font-weight:700"></div>
+      <div class="fgroup"><label>Monto total (S/)</label><input type="number" id="liqMontoTotal" min="0" step="0.01" oninput="liqRecalcNeto()"></div>
+      <div class="fgroup"><label>Retención 8% (S/)</label><input type="text" id="liqRet" readonly style="background:#f0f4f8"></div>
+      <div class="fgroup"><label>Monto a pagar (S/)</label><input type="text" id="liqPagar" readonly style="background:#f0f4f8;font-weight:700"></div>
+    </div>
+    <div id="liqRegla" style="display:none;font-size:11px;color:#92400e;font-weight:700;margin-top:8px;background:#fef3c7;border:1px solid var(--gold);border-radius:6px;padding:8px 10px">⚖ Regla especial <strong>Pana Autos</strong>: el monto por horas equivale al 92%; el <em>Monto total</em> se calcula ÷ 0,92 y la retención 8% se aplica sobre ese total (el monto a pagar queda igual a horas × valor hora).</div>
+    <input type="hidden" id="liqId">
+    <div class="mf"><button class="btn btn-out" onclick="closeOv('ovLiquidacion')">Cancelar</button><button class="btn btn-navy" onclick="saveLiquidacion()">💾 Guardar</button></div>
+  </div>
+</div>
+
+<!-- Modal Usuario -->
+<div class="overlay" id="ovUsuario">
+  <div class="modal" style="max-width:460px">
+    <div class="mh"><span class="mt">Nuevo Usuario</span><button class="x-btn" onclick="closeOv('ovUsuario')">✕</button></div>
+    <div class="fg">
+      <div class="fgroup ff"><label>Correo *</label><input type="email" id="usuEmail" placeholder="usuario@correo.com"></div>
+      <div class="fgroup ff"><label>Nombre</label><input type="text" id="usuNombre" placeholder="Nombre y apellido"></div>
+      <div class="fgroup ff"><label>Perfil *</label><select id="usuRol"><option>Administrativo</option><option>Abogado</option><option>Abogado Externo</option><option>Administrador</option></select></div>
+      <div class="fgroup ff"><label>Clave temporal *</label><div style="display:flex;gap:6px"><input type="text" id="usuClave" style="flex:1" placeholder="mín. 6 caracteres"><button type="button" class="btn btn-out btn-sm" onclick="genClave()">🎲 Generar</button></div></div>
+    </div>
+    <div style="font-size:11px;color:var(--muted);margin-top:8px">El usuario deberá cambiar esta clave en su primer ingreso.</div>
+    <div class="mf"><button class="btn btn-out" onclick="closeOv('ovUsuario')">Cancelar</button><button class="btn btn-navy" id="btnSaveUsu" onclick="saveUsuario()">💾 Crear usuario</button></div>
+  </div>
+</div>
+
+<!-- Modal Cambio de clave obligatorio -->
+<div class="overlay" id="ovCambioClave" style="z-index:2100;background:rgba(26,39,68,.92)">
+  <div class="modal" style="max-width:400px">
+    <div class="mh"><span class="mt">🔐 Cambia tu contraseña</span></div>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:12px">Es tu primer ingreso. Define una nueva contraseña para continuar.</p>
+    <div class="fgroup" style="margin-bottom:10px"><label>Nueva contraseña *</label><input type="password" id="ccNueva" placeholder="mín. 6 caracteres"></div>
+    <div class="fgroup" style="margin-bottom:14px"><label>Repetir contraseña *</label><input type="password" id="ccRepetir" placeholder="repite la contraseña" onkeydown="if(event.key==='Enter')doCambioClave()"></div>
+    <button class="btn btn-navy" style="width:100%;justify-content:center" onclick="doCambioClave()">Guardar y continuar</button>
+    <div id="ccMsg" style="font-size:12px;margin-top:10px;text-align:center;color:var(--muted)"></div>
+  </div>
+</div>
+
+<!-- Modal Confirmar -->
+<div class="overlay" id="ovConfirm">
+  <div class="modal" style="max-width:360px">
+    <div class="mh"><span class="mt" style="color:var(--red)">⚠ Confirmar eliminación</span><button class="x-btn" onclick="closeOv('ovConfirm')">✕</button></div>
+    <p id="cfMsg" style="margin-bottom:6px;font-size:14px;font-weight:600"></p>
+    <p id="cfSub" style="font-size:12px;color:var(--muted)"></p>
+    <div class="mf"><button class="btn btn-out" onclick="closeOv('ovConfirm')">Cancelar</button><button class="btn btn-red" id="cfOk">🗑 Eliminar</button></div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+/* ═══════════════════════ ALMACENAMIENTO ═══════════════════════ */
+var STORE='pardo_cab_nube_v1';
+var SUPA_URL='https://kkgpssccqmsfhwutkvuq.supabase.co';
+var SUPA_KEY='sb_publishable_ee8CG_E6NKG0QynSy0OK8w_qURhVgwt';
+var supa=null,cloudUser=null,cloudReady=false,saveTimer=null,applyingRemote=false,realtimeChan=null;
+var DB=(function(){
+  try{var r=localStorage.getItem(STORE);if(r){var d=JSON.parse(r);if(!d.clientes)d.clientes=[];if(!d.proyectos)d.proyectos=[];if(!d.ingresos)d.ingresos=[];if(!d.gastos)d.gastos=[];if(!d.liquidaciones)d.liquidaciones=[];return d;}}catch(e){}
+  return{abogados:[],tarifas:[],actividades:[],registros:[],clientes:[],proyectos:[],ingresos:[],gastos:[],liquidaciones:[],_lastBackup:null};
+})();
+/* Cronómetro basado en marcas de tiempo reales (preciso aunque la pestaña quede en segundo plano) */
+var timerBaseSec=0,timerStartMs=0,timerRunning=false,timerIv=null,cfCb=null;
+var tipoClienteActual='empresa';
+var SEED_INGRESOS=[];
+var editRegId=null; /* id del registro manual en edición, o null para alta nueva */
+
+function save(){
+  try{localStorage.setItem(STORE,JSON.stringify(DB));}catch(e){}
+  updateBackupInfo();
+  if(!cloudReady||applyingRemote||!supa||!cloudUser)return;
+  clearTimeout(saveTimer);
+  saveTimer=setTimeout(pushCloud,500);
+}
+function nid(a){return a.length?Math.max.apply(null,a.map(function(x){return x.id;}))+1:1;}
+function today(){var d=new Date();return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());}
+function fmtDate(d){if(!d)return'';var p=d.split('-');return p.length===3?p[2]+'/'+p[1]+'/'+p[0]:d;}
+function fmtS(n){return'S/ '+parseFloat(n||0).toLocaleString('es-PE',{minimumFractionDigits:2,maximumFractionDigits:2});}
+function fmtMoneda(n,mon){var s=parseFloat(n||0).toLocaleString('es-PE',{minimumFractionDigits:2,maximumFractionDigits:2});return((mon==='USD')?'US$ ':'S/ ')+s;}
+/* Escapa texto del usuario / APIs externas antes de insertarlo como HTML */
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+function nomAb(id){var a=DB.abogados.find(function(x){return x.id==id;});return a?a.nombre:'—';}
+function nomAct(id){var a=DB.actividades.find(function(x){return x.id==id;});return a?a.nombre:'—';}
+function nomTar(id){var t=DB.tarifas.find(function(x){return x.id==id;});return t?t.nombre:'—';}
+function nomCli(id){var c=DB.clientes.find(function(x){return x.id==id;});return c?c.razonSocial:'—';}
+function nomProy(id){var p=DB.proyectos.find(function(x){return x.id==id;});return p?p.nombre:'—';}
+function s2hms(s){var h=Math.floor(s/3600),m=Math.floor((s%3600)/60),ss=s%60;return pad(h)+':'+pad(m)+':'+pad(ss);}
+function s2h(s){return Math.round((s/3600)*100)/100;}
+function pad(n){return String(n).padStart(2,'0');}
+var _ovZ=1000;
+function openOv(id){var el=document.getElementById(id);el.style.zIndex=(++_ovZ);el.classList.add('open');}
+function closeOv(id){document.getElementById(id).classList.remove('open');}
+function confirm2(msg,sub,cb){
+  document.getElementById('cfMsg').textContent=msg;
+  document.getElementById('cfSub').textContent=sub||'Esta acción no se puede deshacer.';
+  cfCb=cb;
+  document.getElementById('cfOk').onclick=function(){closeOv('ovConfirm');if(cfCb)cfCb();};
+  openOv('ovConfirm');
+}
+function updateBackupInfo(){
+  var el=document.getElementById('backupInfo');if(!el)return;
+  var n=DB.registros.length+DB.clientes.length+DB.proyectos.length;
+  if(!n){el.textContent='';return;}
+  if(DB._lastBackup){el.innerHTML='💾 Última copia: <strong>'+fmtDate(DB._lastBackup)+'</strong>';el.style.color='#a7f3d0';}
+  else{el.innerHTML='⚠ Sin copia de seguridad — exporta tus datos';el.style.color='#fca5a5';}
+}
+
+/* ═══════════════════════ NAVEGACIÓN ═══════════════════════ */
+function showTab(tab,btn){
+  document.querySelectorAll('.tab-content').forEach(function(e){e.classList.remove('active');});
+  document.querySelectorAll('.nav-btn').forEach(function(e){e.classList.remove('active');});
+  document.getElementById('tab-'+tab).classList.add('active');
+  btn.classList.add('active');
+  if(tab==='resumen')renderResumen();
+  if(tab==='cronometro'){fillCronSelects();}
+  if(tab==='reportes')renderRep();
+  if(tab==='finanzas')initFinanzas();
+  if(tab==='liquidacion')initLiquidacion();
+  if(tab==='usuarios')initUsuarios();
+  if(tab==='registro')renderSubActivo();
+}
+function renderSubActivo(){
+  var s=(document.querySelector('.sub-c.active')||{}).id||'';
+  if(s==='sub-reg-abogados')renderAb();
+  else if(s==='sub-reg-actividades')renderAct();
+  else if(s==='sub-reg-tarifas')renderTar();
+  else if(s==='sub-reg-clientes')renderClientes();
+  else if(s==='sub-reg-proyectos'){fillFiltCliProy();renderProyectos();}
+  else if(s==='sub-reg-tiempo'){fillRegSelects();renderRegs();}
+}
+function showSub(sub,btn){
+  document.querySelectorAll('.sub-c').forEach(function(e){e.classList.remove('active');});
+  document.querySelectorAll('.sub-tab').forEach(function(e){e.classList.remove('active');});
+  document.getElementById('sub-'+sub).classList.add('active');
+  btn.classList.add('active');
+  if(sub==='reg-abogados')renderAb();
+  if(sub==='reg-tarifas')renderTar();
+  if(sub==='reg-actividades')renderAct();
+  if(sub==='reg-clientes')renderClientes();
+  if(sub==='reg-proyectos'){fillFiltCliProy();renderProyectos();}
+  if(sub==='reg-tiempo'){fillRegSelects();renderRegs();}
+}
+
+/* ═══════════════════════ RESUMEN ═══════════════════════ */
+function renderResumen(){
+  var totH=DB.registros.reduce(function(s,r){return s+(parseFloat(r.horas)||0);},0);
+  var totM=DB.registros.reduce(function(s,r){return s+(parseFloat(r.monto)||0);},0);
+  var ingV=(DB.ingresos||[]).filter(function(x){return !esRevertido(x);});
+  var ingPEN=ingV.filter(function(x){return x.moneda!=='USD';}).reduce(function(s,x){return s+num(x.neto);},0);
+  var ingUSD=ingV.filter(function(x){return x.moneda==='USD';}).reduce(function(s,x){return s+num(x.neto);},0);
+  var totGas=(DB.gastos||[]).reduce(function(s,x){return s+num(x.monto);},0);
+  var balance=ingPEN-totGas;
+  document.getElementById('kpiResumen').innerHTML=
+    kpi('⚖','Abogados',DB.abogados.length)+kpi('🏢','Clientes',DB.clientes.length)+
+    kpi('📁','Proyectos',DB.proyectos.length)+kpi('🕐','Registros',DB.registros.length)+
+    kpi('⏱','Horas totales',totH.toFixed(1)+' h')+kpi('💵','Total facturado',fmtS(totM))+
+    kpi('📥','Ingresos netos S/',fmtS(ingPEN))+kpi('💵','Ingresos US$',fmtMoneda(ingUSD,'USD'))+
+    kpi('📤','Gastos S/',fmtS(totGas))+kpi(balance>=0?'📈':'📉','Balance S/',fmtS(balance));
+  var cont=document.getElementById('resAbogados');
+  if(!DB.abogados.length){cont.innerHTML='<p class="empty">No hay abogados registrados aún.</p>';return;}
+  var html='<div class="res-grid">';
+  DB.abogados.forEach(function(a){
+    var ra=DB.registros.filter(function(r){return r.abogadoId===a.id;});
+    var h=ra.reduce(function(s,r){return s+(parseFloat(r.horas)||0);},0);
+    var m=ra.reduce(function(s,r){return s+(parseFloat(r.monto)||0);},0);
+    html+='<div class="res-ab-card"><div class="res-ab-name">👤 '+esc(a.nombre)+'</div>'+
+      '<div class="res-ab-meta">'+esc(a.especialidad||'Sin especialidad')+(a.email?' · '+esc(a.email):'')+'</div>'+
+      '<div class="res-ab-stats">'+
+        '<div class="res-stat"><div class="res-stat-val">'+ra.length+'</div><div class="res-stat-lbl">Registros</div></div>'+
+        '<div class="res-stat"><div class="res-stat-val">'+h.toFixed(1)+' h</div><div class="res-stat-lbl">Horas</div></div>'+
+        '<div class="res-stat"><div class="res-stat-val" style="font-size:13px">'+fmtS(m)+'</div><div class="res-stat-lbl">Facturado</div></div>'+
+      '</div></div>';
+  });
+  cont.innerHTML=html+'</div>';
+  var recsOrd=[].concat(DB.registros).sort(function(a,b){return b.fecha.localeCompare(a.fecha);}).slice(0,10);
+  var tb=document.getElementById('bodyUltimos');tb.innerHTML='';
+  if(!recsOrd.length){tb.innerHTML='<tr><td colspan="7" class="empty">No hay registros aún.</td></tr>';return;}
+  recsOrd.forEach(function(r){
+    var tr=document.createElement('tr');
+    tr.innerHTML='<td>'+fmtDate(r.fecha)+'</td><td>'+esc(nomAb(r.abogadoId))+'</td><td>'+esc(nomAct(r.actividadId))+'</td><td>'+esc(nomTar(r.tarifaId))+'</td><td>'+(r.horas||'—')+'</td><td>'+fmtS(r.monto)+'</td><td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(r.descripcion||'—')+'</td>';
+    tb.appendChild(tr);
+  });
+}
+
+/* ═══════════════════════ CRONÓMETRO ═══════════════════════ */
+function elapsedSec(){return timerBaseSec+(timerRunning?Math.floor((Date.now()-timerStartMs)/1000):0);}
+function timerTick(){
+  var s=elapsedSec();
+  document.getElementById('timerDisp').textContent=s2hms(s);
+  document.getElementById('timerHours').textContent=s2h(s).toFixed(2);
+  crCalcMonto();
+}
+function startTimer(){
+  timerBaseSec=0;timerStartMs=Date.now();timerRunning=true;
+  document.getElementById('timerDisp').className='timer-disp timer-run';
+  document.getElementById('timerStatus').textContent='En curso...';
+  document.getElementById('btnStart').style.display='none';
+  document.getElementById('btnPause').style.display='';
+  document.getElementById('btnResume').style.display='none';
+  document.getElementById('btnStop').style.display='';
+  timerTick();
+  clearInterval(timerIv);
+  timerIv=setInterval(timerTick,1000);
+}
+function pauseTimer(){
+  timerBaseSec=elapsedSec();timerRunning=false;
+  document.getElementById('timerDisp').className='timer-disp timer-pause';
+  document.getElementById('timerStatus').textContent='Pausado';
+  document.getElementById('btnPause').style.display='none';
+  document.getElementById('btnResume').style.display='';
+}
+function resumeTimer(){
+  timerStartMs=Date.now();timerRunning=true;
+  document.getElementById('timerDisp').className='timer-disp timer-run';
+  document.getElementById('timerStatus').textContent='En curso...';
+  document.getElementById('btnResume').style.display='none';
+  document.getElementById('btnPause').style.display='';
+}
+function stopTimer(){
+  timerBaseSec=elapsedSec();timerRunning=false;
+  clearInterval(timerIv);
+  document.getElementById('timerDisp').className='timer-disp timer-idle';
+  document.getElementById('timerDisp').textContent=s2hms(timerBaseSec);
+  document.getElementById('timerStatus').textContent='Tiempo detenido — Complete el formulario y guarde.';
+  document.getElementById('btnStart').style.display='';document.getElementById('btnPause').style.display='none';
+  document.getElementById('btnResume').style.display='none';document.getElementById('btnStop').style.display='none';
+  document.getElementById('crHoras').value=s2h(timerBaseSec);crCalcMonto();
+}
+function fillCronSelects(){
+  fillSel('crAbogado',DB.abogados,'nombre','— Seleccionar —');
+  fillSel('crActividad',DB.actividades,'nombre','— Seleccionar —');
+  fillSel2Tar('crTarifa');
+  fillSel2Cli('crCliente',true);
+  fillPrPorCli('crProyecto','crCliente');
+  if(!document.getElementById('crFecha').value)document.getElementById('crFecha').value=today();
+}
+function crAutoTarifa(){
+  var abId=parseInt(document.getElementById('crAbogado').value);
+  if(!abId)return;
+  var ab=DB.abogados.find(function(x){return x.id===abId;});
+  if(ab&&ab.tarifaId)document.getElementById('crTarifa').value=ab.tarifaId;
+  crCalcMonto();
+}
+function crCalcMonto(){
+  var tarId=parseInt(document.getElementById('crTarifa').value);
+  var horas=parseFloat(document.getElementById('crHoras').value)||s2h(elapsedSec());
+  var monto=0;
+  if(tarId){var t=DB.tarifas.find(function(x){return x.id===tarId;});if(t)monto=t.tipo==='hora'?t.valor*horas:t.valor;}
+  document.getElementById('crMonto').value=monto.toFixed(2);
+  document.getElementById('timerMonto').textContent=fmtS(monto);
+}
+function guardarCronReg(){
+  var fecha=document.getElementById('crFecha').value;
+  var abId=parseInt(document.getElementById('crAbogado').value);
+  var actId=parseInt(document.getElementById('crActividad').value);
+  var tarId=parseInt(document.getElementById('crTarifa').value);
+  var horas=parseFloat(document.getElementById('crHoras').value)||0;
+  var monto=parseFloat(document.getElementById('crMonto').value)||0;
+  var cliId=parseInt(document.getElementById('crCliente').value)||null;
+  var proyId=parseInt(document.getElementById('crProyecto').value)||null;
+  if(!fecha){alert('Ingrese la fecha.');return;}
+  if(!abId){alert('Seleccione un abogado.');return;}
+  if(!actId){alert('Seleccione una actividad.');return;}
+  if(!tarId){alert('Seleccione una tarifa.');return;}
+  if(!horas){alert('No hay tiempo registrado. Inicie y detenga el cronómetro.');return;}
+  DB.registros.push({id:nid(DB.registros),fecha:fecha,abogadoId:abId,actividadId:actId,tarifaId:tarId,horas:horas,monto:monto,clienteId:cliId,proyectoId:proyId,descripcion:document.getElementById('crDesc').value.trim(),tipo:'timer'});
+  save();limpiarCron();alert('✅ Registro de cronómetro guardado.');
+}
+function limpiarCron(){
+  timerBaseSec=0;timerRunning=false;clearInterval(timerIv);
+  document.getElementById('timerDisp').textContent='00:00:00';document.getElementById('timerDisp').className='timer-disp timer-idle';
+  document.getElementById('timerStatus').textContent='Listo para iniciar';
+  document.getElementById('btnStart').style.display='';document.getElementById('btnPause').style.display='none';
+  document.getElementById('btnResume').style.display='none';document.getElementById('btnStop').style.display='none';
+  document.getElementById('timerHours').textContent='0.00';document.getElementById('timerMonto').textContent='S/ 0.00';
+  document.getElementById('crFecha').value=today();
+  ['crAbogado','crActividad','crTarifa','crCliente','crProyecto'].forEach(function(f){document.getElementById(f).value='';});
+  ['crHoras','crMonto','crDesc'].forEach(function(f){document.getElementById(f).value='';});
+}
+
+/* ═══════════════════════ HELPERS SELECT ═══════════════════════ */
+function fillSel(id,arr,campo,blank){
+  var s=document.getElementById(id),cv=s.value;
+  s.innerHTML='<option value="">'+esc(blank)+'</option>';
+  arr.forEach(function(x){s.innerHTML+='<option value="'+x.id+'">'+esc(x[campo])+'</option>';});
+  s.value=cv;
+}
+function fillSel2Tar(id){
+  var s=document.getElementById(id),cv=s.value;
+  s.innerHTML='<option value="">— Seleccionar —</option>';
+  DB.tarifas.forEach(function(t){s.innerHTML+='<option value="'+t.id+'">'+esc(t.nombre)+' ('+(t.tipo==='hora'?'S/'+t.valor+'/hr':'S/'+t.valor+' fijo')+')</option>';});
+  s.value=cv;
+}
+function fillSel2Cli(id,withBlank){
+  var s=document.getElementById(id),cv=s.value;
+  s.innerHTML=withBlank?'<option value="">— Sin cliente —</option>':'<option value="">Todos</option>';
+  DB.clientes.forEach(function(c){s.innerHTML+='<option value="'+c.id+'">'+esc(c.razonSocial)+(c.ruc?' ('+esc(c.ruc)+')':'')+'</option>';});
+  s.value=cv;
+}
+function fillPrPorCli(proySelId,cliSelId){
+  var cliId=parseInt(document.getElementById(cliSelId).value)||null;
+  var s=document.getElementById(proySelId);var cv=s.value;
+  s.innerHTML='<option value="">— Sin proyecto —</option>';
+  DB.proyectos.filter(function(p){return !cliId||p.clienteId===cliId;}).forEach(function(p){s.innerHTML+='<option value="'+p.id+'">'+esc(p.nombre)+'</option>';});
+  s.value=cv;
+}
+
+/* ═══════════════════════ REGISTRO HORAS MANUAL ═══════════════════════ */
+function fillRegSelects(){
+  fillSel('rAbogado',DB.abogados,'nombre','— Seleccionar —');
+  fillSel('rActividad',DB.actividades,'nombre','— Seleccionar —');
+  fillSel2Tar('rTarifa');
+  fillSel2Cli('rCliente',true);
+  fillPrPorCli('rProyecto','rCliente');
+  fillSel('fAbReg',DB.abogados,'nombre','Todos');
+  if(!document.getElementById('rFecha').value)document.getElementById('rFecha').value=today();
+}
+function autoTarifa(){
+  var abId=parseInt(document.getElementById('rAbogado').value);
+  if(!abId)return;
+  var ab=DB.abogados.find(function(x){return x.id===abId;});
+  if(ab&&ab.tarifaId)document.getElementById('rTarifa').value=ab.tarifaId;
+  calcMonto();
+}
+function calcMonto(){
+  var tarId=parseInt(document.getElementById('rTarifa').value);
+  var horas=parseFloat(document.getElementById('rHoras').value)||0;
+  if(!tarId){document.getElementById('rMonto').value='';return;}
+  var t=DB.tarifas.find(function(x){return x.id===tarId;});
+  if(!t)return;
+  document.getElementById('rMonto').value=(t.tipo==='hora'?t.valor*horas:t.valor).toFixed(2);
+}
+function guardarReg(){
+  var fecha=document.getElementById('rFecha').value;
+  var abId=parseInt(document.getElementById('rAbogado').value);
+  var actId=parseInt(document.getElementById('rActividad').value);
+  var tarId=parseInt(document.getElementById('rTarifa').value);
+  var horas=parseFloat(document.getElementById('rHoras').value)||0;
+  var monto=parseFloat(document.getElementById('rMonto').value)||0;
+  var cliId=parseInt(document.getElementById('rCliente').value)||null;
+  var proyId=parseInt(document.getElementById('rProyecto').value)||null;
+  if(!fecha){alert('Ingrese la fecha.');return;}
+  if(!abId){alert('Seleccione un abogado.');return;}
+  if(!actId){alert('Seleccione una actividad.');return;}
+  if(!tarId){alert('Seleccione una tarifa.');return;}
+  if(!horas){alert('Ingrese las horas trabajadas.');return;}
+  if(editRegId){
+    var i=DB.registros.findIndex(function(r){return r.id===editRegId;});
+    if(i>=0){
+      DB.registros[i].fecha=fecha;DB.registros[i].abogadoId=abId;DB.registros[i].actividadId=actId;
+      DB.registros[i].tarifaId=tarId;DB.registros[i].horas=horas;DB.registros[i].monto=monto;
+      DB.registros[i].clienteId=cliId;DB.registros[i].proyectoId=proyId;
+      DB.registros[i].descripcion=document.getElementById('rDesc').value.trim();
+    }
+    save();limpiarReg();renderRegs();alert('✅ Registro actualizado.');
+  }else{
+    DB.registros.push({id:nid(DB.registros),fecha:fecha,abogadoId:abId,actividadId:actId,tarifaId:tarId,horas:horas,monto:monto,clienteId:cliId,proyectoId:proyId,descripcion:document.getElementById('rDesc').value.trim(),tipo:'manual'});
+    save();limpiarReg();renderRegs();alert('✅ Registro guardado.');
+  }
+}
+function limpiarReg(){
+  editRegId=null;
+  document.getElementById('regEditBanner').classList.remove('show');
+  document.getElementById('btnGuardarReg').textContent='💾 Guardar registro';
+  document.getElementById('rFecha').value=today();
+  ['rAbogado','rActividad','rTarifa','rCliente','rProyecto'].forEach(function(f){document.getElementById(f).value='';});
+  fillPrPorCli('rProyecto','rCliente');
+  ['rHoras','rMonto','rDesc'].forEach(function(f){document.getElementById(f).value='';});
+}
+function editReg(id){
+  var r=DB.registros.find(function(x){return x.id===id;});
+  if(!r)return;
+  fillRegSelects();
+  editRegId=id;
+  document.getElementById('rFecha').value=r.fecha||today();
+  document.getElementById('rAbogado').value=r.abogadoId||'';
+  document.getElementById('rActividad').value=r.actividadId||'';
+  document.getElementById('rTarifa').value=r.tarifaId||'';
+  document.getElementById('rCliente').value=r.clienteId||'';
+  fillPrPorCli('rProyecto','rCliente');
+  document.getElementById('rProyecto').value=r.proyectoId||'';
+  document.getElementById('rHoras').value=r.horas||'';
+  document.getElementById('rMonto').value=r.monto||'';
+  document.getElementById('rDesc').value=r.descripcion||'';
+  document.getElementById('regEditBanner').classList.add('show');
+  document.getElementById('btnGuardarReg').textContent='💾 Actualizar registro';
+  document.getElementById('regEditBanner').scrollIntoView({behavior:'smooth',block:'center'});
+}
+function renderRegs(){
+  var tb=document.getElementById('bodyRegs');
+  var regs=[].concat(DB.registros).filter(function(r){return r.tipo==='manual';});
+  var fd=document.getElementById('fDesde').value,fh=document.getElementById('fHasta').value;
+  var abId=parseInt(document.getElementById('fAbReg').value);
+  if(fd)regs=regs.filter(function(r){return r.fecha>=fd;});
+  if(fh)regs=regs.filter(function(r){return r.fecha<=fh;});
+  if(abId)regs=regs.filter(function(r){return r.abogadoId===abId;});
+  regs.sort(function(a,b){return b.fecha.localeCompare(a.fecha);});
+  if(!regs.length){tb.innerHTML='<tr><td colspan="10" class="empty">No hay registros manuales</td></tr>';return;}
+  tb.innerHTML='';
+  regs.forEach(function(r){
+    var tr=document.createElement('tr');
+    tr.innerHTML='<td>'+fmtDate(r.fecha)+'</td><td>'+esc(nomAb(r.abogadoId))+'</td><td>'+esc(nomAct(r.actividadId))+'</td>'+
+      '<td>'+(r.clienteId?esc(nomCli(r.clienteId)):'—')+'</td><td>'+(r.proyectoId?esc(nomProy(r.proyectoId)):'—')+'</td>'+
+      '<td>'+esc(nomTar(r.tarifaId))+'</td><td>'+(r.horas||'—')+'</td><td>'+fmtS(r.monto)+'</td>'+
+      '<td style="max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(r.descripcion||'—')+'</td>'+
+      '<td><div class="acts"><button class="btn btn-amber btn-sm" onclick="editReg('+r.id+')">✏</button><button class="btn btn-red btn-sm" onclick="delReg('+r.id+')">🗑</button></div></td>';
+    tb.appendChild(tr);
+  });
+}
+function delReg(id){confirm2('¿Borrar este registro de horas?','Solo se borra el registro.',function(){DB.registros=DB.registros.filter(function(r){return r.id!==id;});if(editRegId===id)limpiarReg();save();renderRegs();});}
+function limpFiltReg(){['fDesde','fHasta','fAbReg'].forEach(function(f){document.getElementById(f).value='';});renderRegs();}
+function exportRegCSV(){
+  var rows=[['Fecha','Abogado','Actividad','Cliente','Proyecto','Tarifa','Horas','Monto S/','Descripcion']];
+  DB.registros.filter(function(r){return r.tipo==='manual';}).forEach(function(r){
+    rows.push([fmtDate(r.fecha),nomAb(r.abogadoId),nomAct(r.actividadId),r.clienteId?nomCli(r.clienteId):'',r.proyectoId?nomProy(r.proyectoId):'',nomTar(r.tarifaId),r.horas,r.monto,r.descripcion||'']);
+  });dlCSV(rows,'registros_manual.csv');
+}
+
+/* ═══════════════════════ ABOGADOS ═══════════════════════ */
+function renderAb(){
+  var tb=document.getElementById('bodyAb');
+  if(!DB.abogados.length){tb.innerHTML='<tr><td colspan="7" class="empty">No hay abogados registrados</td></tr>';return;}
+  tb.innerHTML='';
+  DB.abogados.forEach(function(a,i){
+    var tr=document.createElement('tr');
+    tr.innerHTML='<td>'+(i+1)+'</td><td><strong>'+esc(a.nombre)+'</strong></td><td>'+esc(a.especialidad||'—')+'</td><td>'+esc(a.email||'—')+'</td><td>'+esc(a.telefono||'—')+'</td><td>'+(a.tarifaId?esc(nomTar(a.tarifaId)):'—')+'</td>'+
+      '<td><div class="acts"><button class="btn btn-amber btn-sm" onclick="editAb('+a.id+')">✏ Modificar</button><button class="btn btn-red btn-sm" onclick="delAb('+a.id+')">🗑 Borrar</button></div></td>';
+    tb.appendChild(tr);
+  });
+}
+function openAbogado(id){
+  ['abNom','abEsp','abEmail','abTel'].forEach(function(f){document.getElementById(f).value='';});
+  document.getElementById('abId').value='';document.getElementById('titAbogado').textContent='Nuevo Abogado';
+  var sel=document.getElementById('abTarDef');sel.innerHTML='<option value="">— Ninguna —</option>';
+  DB.tarifas.forEach(function(t){sel.innerHTML+='<option value="'+t.id+'">'+esc(t.nombre)+'</option>';});
+  if(id){var a=DB.abogados.find(function(x){return x.id===id;});if(a){document.getElementById('abNom').value=a.nombre;document.getElementById('abEsp').value=a.especialidad||'';document.getElementById('abEmail').value=a.email||'';document.getElementById('abTel').value=a.telefono||'';document.getElementById('abTarDef').value=a.tarifaId||'';document.getElementById('abId').value=a.id;document.getElementById('titAbogado').textContent='Modificar Abogado';}}
+  openOv('ovAbogado');
+}
+function editAb(id){openAbogado(id);}
+function saveAbogado(){
+  var nom=document.getElementById('abNom').value.trim();if(!nom){alert('Ingrese el nombre.');return;}
+  var id=parseInt(document.getElementById('abId').value);
+  var obj={nombre:nom,especialidad:document.getElementById('abEsp').value.trim(),email:document.getElementById('abEmail').value.trim(),telefono:document.getElementById('abTel').value.trim(),tarifaId:parseInt(document.getElementById('abTarDef').value)||null};
+  if(id){var i=DB.abogados.findIndex(function(x){return x.id===id;});if(i>=0){obj.id=id;DB.abogados[i]=obj;}}else{obj.id=nid(DB.abogados);DB.abogados.push(obj);}
+  save();
+  if(abogadoReturn==='cliente'){abogadoReturn=null;closeOv('ovAbogado');var cab=document.getElementById('cliAbogado');cab.innerHTML='<option value="">— Sin asignar —</option>';DB.abogados.forEach(function(a){cab.innerHTML+='<option value="'+a.id+'">'+esc(a.nombre)+'</option>';});cab.value=obj.id;renderAb();return;}
+  closeOv('ovAbogado');renderAb();
+}
+function delAb(id){var a=DB.abogados.find(function(x){return x.id===id;});confirm2('¿Borrar al abogado "'+a.nombre+'"?','Los registros asociados se conservarán.',function(){DB.abogados=DB.abogados.filter(function(x){return x.id!==id;});save();renderAb();});}
+
+/* ═══════════════════════ ACTIVIDADES ═══════════════════════ */
+function renderAct(){
+  var tb=document.getElementById('bodyAct');
+  if(!DB.actividades.length){tb.innerHTML='<tr><td colspan="7" class="empty">No hay actividades</td></tr>';return;}
+  tb.innerHTML='';
+  DB.actividades.forEach(function(a,i){
+    var tr=document.createElement('tr');
+    tr.innerHTML='<td>'+(i+1)+'</td><td><strong>'+esc(a.nombre)+'</strong></td><td><span class="badge b-cat">'+esc(a.categoria)+'</span></td><td>'+(a.fecha?fmtDate(a.fecha):'—')+'</td><td>'+(a.horas!=null&&a.horas!==''?a.horas:'—')+'</td><td>'+esc(a.desc||'—')+'</td>'+
+      '<td><div class="acts"><button class="btn btn-amber btn-sm" onclick="editAct('+a.id+')">✏ Modificar</button><button class="btn btn-red btn-sm" onclick="delAct('+a.id+')">🗑 Borrar</button></div></td>';
+    tb.appendChild(tr);
+  });
+}
+function openActividad(id){
+  document.getElementById('actNom').value='';document.getElementById('actDesc').value='';document.getElementById('actCat').value='Consultoría';document.getElementById('actFecha').value=today();document.getElementById('actHoras').value='';document.getElementById('actId').value='';document.getElementById('titActividad').textContent='Nueva Actividad';
+  if(id){var a=DB.actividades.find(function(x){return x.id===id;});if(a){document.getElementById('actNom').value=a.nombre;document.getElementById('actCat').value=a.categoria;document.getElementById('actDesc').value=a.desc||'';document.getElementById('actFecha').value=a.fecha||today();document.getElementById('actHoras').value=(a.horas!=null?a.horas:'');document.getElementById('actId').value=a.id;document.getElementById('titActividad').textContent='Modificar Actividad';}}
+  openOv('ovActividad');
+}
+function editAct(id){openActividad(id);}
+function saveActividad(){
+  var nom=document.getElementById('actNom').value.trim();if(!nom){alert('Ingrese el nombre.');return;}
+  var id=parseInt(document.getElementById('actId').value);
+  var obj={nombre:nom,categoria:document.getElementById('actCat').value,fecha:document.getElementById('actFecha').value,horas:parseFloat(document.getElementById('actHoras').value)||0,desc:document.getElementById('actDesc').value.trim()};
+  if(id){var i=DB.actividades.findIndex(function(x){return x.id===id;});if(i>=0){obj.id=id;DB.actividades[i]=obj;}}else{obj.id=nid(DB.actividades);DB.actividades.push(obj);}
+  save();closeOv('ovActividad');renderAct();
+}
+function delAct(id){var a=DB.actividades.find(function(x){return x.id===id;});confirm2('¿Borrar la actividad "'+a.nombre+'"?','',function(){DB.actividades=DB.actividades.filter(function(x){return x.id!==id;});save();renderAct();});}
+
+/* ═══════════════════════ TARIFAS ═══════════════════════ */
+function renderTar(){
+  var tb=document.getElementById('bodyTar');
+  if(!DB.tarifas.length){tb.innerHTML='<tr><td colspan="7" class="empty">No hay tarifas</td></tr>';return;}
+  tb.innerHTML='';
+  DB.tarifas.forEach(function(t,i){
+    var asig=(t.abogados||[]).map(function(id){return nomAb(id);}).filter(function(n){return n!=='—';}).join(', ')||'—';
+    var tr=document.createElement('tr');
+    tr.innerHTML='<td>'+(i+1)+'</td><td><strong>'+esc(t.nombre)+'</strong></td>'+
+      '<td><span class="badge '+(t.tipo==='hora'?'b-hora':'b-fijo')+'">'+(t.tipo==='hora'?'Por hora':'Fijo')+'</span></td>'+
+      '<td>'+fmtS(t.valor)+(t.tipo==='hora'?'/hr':'')+'</td><td>'+esc(t.desc||'—')+'</td><td style="font-size:12px">'+esc(asig)+'</td>'+
+      '<td><div class="acts"><button class="btn btn-amber btn-sm" onclick="editTar('+t.id+')">✏ Modificar</button><button class="btn btn-red btn-sm" onclick="delTar('+t.id+')">🗑 Borrar</button></div></td>';
+    tb.appendChild(tr);
+  });
+}
+function openTarifa(id){
+  ['tarNom','tarVal','tarDesc'].forEach(function(f){document.getElementById(f).value='';});
+  document.getElementById('tarTipo').value='hora';document.getElementById('tarId').value='';document.getElementById('titTarifa').textContent='Nueva Tarifa';
+  var list=document.getElementById('tarAbList');list.innerHTML='';
+  var chk=id?(DB.tarifas.find(function(x){return x.id===id;})||{abogados:[]}).abogados||[]:[];
+  if(!DB.abogados.length)list.innerHTML='<p style="font-size:12px;color:var(--muted)">Registre abogados primero.</p>';
+  DB.abogados.forEach(function(a){var d=document.createElement('div');d.className='check-item';d.innerHTML='<input type="checkbox" id="tc_'+a.id+'" value="'+a.id+'"'+(chk.indexOf(a.id)>=0?' checked':'')+'> <label for="tc_'+a.id+'">'+esc(a.nombre)+'</label>';list.appendChild(d);});
+  if(id){var t=DB.tarifas.find(function(x){return x.id===id;});if(t){document.getElementById('tarNom').value=t.nombre;document.getElementById('tarTipo').value=t.tipo;document.getElementById('tarVal').value=t.valor;document.getElementById('tarDesc').value=t.desc||'';document.getElementById('tarId').value=t.id;document.getElementById('titTarifa').textContent='Modificar Tarifa';}}
+  openOv('ovTarifa');
+}
+function editTar(id){openTarifa(id);}
+function saveTarifa(){
+  var nom=document.getElementById('tarNom').value.trim();if(!nom){alert('Ingrese el nombre.');return;}
+  var val=parseFloat(document.getElementById('tarVal').value);if(isNaN(val)||val<0){alert('Ingrese un valor válido.');return;}
+  var abSel=[];document.querySelectorAll('#tarAbList input[type=checkbox]:checked').forEach(function(cb){abSel.push(parseInt(cb.value));});
+  var id=parseInt(document.getElementById('tarId').value);
+  var obj={nombre:nom,tipo:document.getElementById('tarTipo').value,valor:val,desc:document.getElementById('tarDesc').value.trim(),abogados:abSel};
+  if(id){var i=DB.tarifas.findIndex(function(x){return x.id===id;});if(i>=0){obj.id=id;DB.tarifas[i]=obj;}}else{obj.id=nid(DB.tarifas);DB.tarifas.push(obj);}
+  save();
+  if(tarifaReturn==='abogado'){tarifaReturn=null;closeOv('ovTarifa');var abs=document.getElementById('abTarDef');abs.innerHTML='<option value="">— Ninguna —</option>';DB.tarifas.forEach(function(t){abs.innerHTML+='<option value="'+t.id+'">'+esc(t.nombre)+'</option>';});abs.value=obj.id;renderTar();return;}
+  closeOv('ovTarifa');renderTar();
+}
+function delTar(id){var t=DB.tarifas.find(function(x){return x.id===id;});confirm2('¿Borrar la tarifa "'+t.nombre+'"?','',function(){DB.tarifas=DB.tarifas.filter(function(x){return x.id!==id;});save();renderTar();});}
+
+/* ═══════════════════════ CLIENTES ═══════════════════════ */
+function setTipoCliente(tipo){
+  tipoClienteActual=tipo;
+  document.getElementById('cliTipo').value=tipo;
+  document.getElementById('tipoBtnEmp').classList.toggle('active',tipo==='empresa');
+  document.getElementById('tipoBtnPer').classList.toggle('active',tipo==='persona');
+  document.getElementById('rucLabel').textContent=tipo==='empresa'?'RUC (11 dígitos) *':'RUC / DNI *';
+  document.getElementById('razonLabel').textContent=tipo==='empresa'?'Razón Social *':'Nombres y Apellidos *';
+  document.getElementById('btnConsultaRuc').textContent=tipo==='empresa'?'🔍 Consultar SUNAT':'🔍 Consultar';
+}
+
+function consultarRUC(){
+  var ruc=document.getElementById('cliRuc').value.trim();
+  if(!ruc||ruc.length<8){alert('Ingrese un RUC o DNI válido.');return;}
+  var res=document.getElementById('sunatResult');
+  res.innerHTML='<div class="sunat-result loading">⏳ Consultando SUNAT... por favor espere.</div>';
+  document.getElementById('btnConsultaRuc').disabled=true;
+  var urlLink='https://e-consultaruc.sunat.gob.pe/cl-ti-itmrconsruc/FrameCriterioBusquedaWeb.jsp';
+  document.getElementById('linkSunat').href=urlLink+'?accion=consultar&nroRuc='+encodeURIComponent(ruc);
+  document.getElementById('linkSunat').style.display='';
+  // Intentar API pública SUNAT
+  fetch('https://api.sunat.cloud/v1/contributor/byNumber/'+encodeURIComponent(ruc),{signal:AbortSignal.timeout?AbortSignal.timeout(8000):undefined})
+    .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json();})
+    .then(function(d){procesarRespuestaSunat(d);})
+    .catch(function(){
+      // Intentar segunda API
+      fetch('https://api.apis.net.pe/v1/ruc?numero='+encodeURIComponent(ruc),{headers:{'Content-Type':'application/json'},signal:AbortSignal.timeout?AbortSignal.timeout(8000):undefined})
+        .then(function(r2){if(!r2.ok)throw new Error('HTTP '+r2.status);return r2.json();})
+        .then(function(d2){procesarRespuestaApisNet(d2);})
+        .catch(function(){mostrarFallbackSunat(ruc);});
+    })
+    .finally(function(){document.getElementById('btnConsultaRuc').disabled=false;});
+}
+
+function procesarRespuestaSunat(d){
+  // Formato api.sunat.cloud
+  var razon=d.ddp_nombre||d.razonSocial||'';
+  var estado=d.ddp_estado||d.estado||'';
+  var condicion=d.ddp_ubigeo_ref||d.condicion||'';
+  var dir=d.ddp_domic_fiscal||d.direccion||'';
+  var tipo=d.ddp_tipo_contrib||d.tipoContribuyente||'';
+  if(!razon&&!estado){mostrarFallbackSunat(document.getElementById('cliRuc').value);return;}
+  aplicarDatosSunat(razon,estado,tipo,dir);
+}
+function procesarRespuestaApisNet(d){
+  var razon=d.razonSocial||d.nombre||'';
+  var estado=(d.condicion||'')+(d.estado?' / '+d.estado:'');
+  var tipo=d.tipoContribuyente||'';
+  var dir=d.direccion||'';
+  if(!razon){mostrarFallbackSunat(document.getElementById('cliRuc').value);return;}
+  aplicarDatosSunat(razon,estado,tipo,dir);
+}
+function aplicarDatosSunat(razon,estado,tipo,dir){
+  document.getElementById('cliRazon').value=razon;
+  document.getElementById('cliEstado').value=estado;
+  document.getElementById('cliTipoContrib').value=tipo;
+  document.getElementById('cliDir').value=dir;
+  var esHabido=(estado.toLowerCase().indexOf('habido')>=0&&estado.toLowerCase().indexOf('no')<0)||estado.toLowerCase()==='activo';
+  var res=document.getElementById('sunatResult');
+  res.innerHTML='<div class="sunat-result">'+
+    '<div class="sunat-row"><span class="sunat-lbl">📋 Razón Social:</span><span class="sunat-val"><strong>'+esc(razon)+'</strong></span></div>'+
+    '<div class="sunat-row"><span class="sunat-lbl">✅ Estado:</span><span class="sunat-val '+(esHabido?'habido':'no-habido')+'">'+esc(estado)+'</span></div>'+
+    (tipo?'<div class="sunat-row"><span class="sunat-lbl">🏢 Tipo:</span><span class="sunat-val">'+esc(tipo)+'</span></div>':'')+
+    (dir?'<div class="sunat-row"><span class="sunat-lbl">📍 Dirección:</span><span class="sunat-val">'+esc(dir)+'</span></div>':'')+
+    '</div>';
+}
+function mostrarFallbackSunat(ruc){
+  var res=document.getElementById('sunatResult');
+  res.innerHTML='<div class="sunat-result error">'+
+    '<strong>⚠ No se pudo consultar automáticamente.</strong><br>'+
+    '<span style="font-size:12px">Por favor ingresa los datos manualmente o haz clic en 🌐 Abrir SUNAT para consultar en el sitio oficial.<br>'+
+    'URL directa: <a href="https://e-consultaruc.sunat.gob.pe/cl-ti-itmrconsruc/FrameCriterioBusquedaWeb.jsp" target="_blank" rel="noopener" style="color:var(--blue)">Consulta RUC SUNAT</a></span>'+
+    '</div>';
+}
+
+function renderClientes(){
+  var tb=document.getElementById('bodyCli');
+  var lista=[].concat(DB.clientes);
+  var busq=(document.getElementById('filtBusqCli').value||'').toLowerCase();
+  var tipo=document.getElementById('filtTipoCli').value;
+  if(busq)lista=lista.filter(function(c){return(c.razonSocial||'').toLowerCase().indexOf(busq)>=0||(c.ruc||'').indexOf(busq)>=0;});
+  if(tipo)lista=lista.filter(function(c){return c.tipo===tipo;});
+  if(!lista.length){tb.innerHTML='<tr><td colspan="12" class="empty">No hay clientes registrados</td></tr>';return;}
+  tb.innerHTML='';
+  lista.forEach(function(c,i){
+    var esHabido=(c.estado||'').toLowerCase().indexOf('habido')>=0&&(c.estado||'').toLowerCase().indexOf('no')<0;
+    var tr=document.createElement('tr');
+    tr.innerHTML='<td>'+(i+1)+'</td>'+
+      '<td><strong>'+esc(c.codigo||'—')+'</strong></td>'+
+      '<td><span class="badge '+(c.tipo==='empresa'?'b-hora':'b-cat')+'">'+(c.tipo==='empresa'?'🏢 Empresa':'👤 Persona')+'</span></td>'+
+      '<td><strong>'+esc(c.ruc||'—')+'</strong></td>'+
+      '<td><strong>'+esc(c.razonSocial)+'</strong></td>'+
+      '<td>'+(c.estado?'<span class="'+(esHabido?'habido':'no-habido')+'">'+esc(c.estado)+'</span>':'—')+'</td>'+
+      '<td style="font-size:12px">'+esc(c.tipoContrib||'—')+'</td>'+
+      '<td style="font-size:12px;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(c.direccion||'—')+'</td>'+
+      '<td style="font-size:12px">'+esc(c.contacto||c.email||'—')+'</td>'+
+      '<td style="font-size:12px">'+(c.abogadoId?esc(nomAb(c.abogadoId)):'—')+'</td>'+
+      '<td style="font-size:12px;white-space:nowrap">'+(c.tarifaValor?('S/ '+c.tarifaValor+(c.tarifaTipo==='hora'?'/hr':' fijo')):'—')+'</td>'+
+      '<td><div class="acts"><button class="btn btn-amber btn-sm" onclick="editCli('+c.id+')">✏</button><button class="btn btn-red btn-sm" onclick="delCli('+c.id+')">🗑</button></div></td>';
+    tb.appendChild(tr);
+  });
+}
+function limpFiltCli(){document.getElementById('filtBusqCli').value='';document.getElementById('filtTipoCli').value='';renderClientes();}
+
+var abogadoReturn=null;
+function nextCodigoCliente(){
+  var mx=0;
+  DB.clientes.forEach(function(c){var m=(c.codigo||'').match(/(\d+)\s*$/);if(m){var n=parseInt(m[1],10);if(n>mx)mx=n;}});
+  return 'CLI-'+String(mx+1).padStart(4,'0');
+}
+function nuevoAbogadoDesdeCliente(){abogadoReturn='cliente';openAbogado();}
+function cancelAbogado(){abogadoReturn=null;closeOv('ovAbogado');}
+function openCliente(id){
+  ['cliRuc','cliRazon','cliEstado','cliTipoContrib','cliDir','cliTel','cliEmail','cliContacto','cliNotas','cliCodigo','cliTarValor'].forEach(function(f){document.getElementById(f).value='';});
+  document.getElementById('cliTarTipo').value='hora';
+  document.getElementById('cliId').value='';document.getElementById('sunatResult').innerHTML='';
+  document.getElementById('linkSunat').style.display='none';
+  var cab=document.getElementById('cliAbogado');cab.innerHTML='<option value="">— Sin asignar —</option>';
+  DB.abogados.forEach(function(a){cab.innerHTML+='<option value="'+a.id+'">'+esc(a.nombre)+'</option>';});
+  setTipoCliente('empresa');document.getElementById('titCliente').textContent='Nuevo Cliente';
+  if(id){
+    var c=DB.clientes.find(function(x){return x.id===id;});
+    if(c){
+      setTipoCliente(c.tipo||'empresa');
+      document.getElementById('cliCodigo').value=c.codigo||'';
+      document.getElementById('cliAbogado').value=c.abogadoId||'';
+      document.getElementById('cliRuc').value=c.ruc||'';
+      document.getElementById('cliRazon').value=c.razonSocial||'';
+      document.getElementById('cliEstado').value=c.estado||'';
+      document.getElementById('cliTipoContrib').value=c.tipoContrib||'';
+      document.getElementById('cliDir').value=c.direccion||'';
+      document.getElementById('cliTel').value=c.telefono||'';
+      document.getElementById('cliEmail').value=c.email||'';
+      document.getElementById('cliContacto').value=c.contacto||'';
+      document.getElementById('cliTarTipo').value=c.tarifaTipo||'hora';
+      document.getElementById('cliTarValor').value=(c.tarifaValor!=null?c.tarifaValor:'');
+      document.getElementById('cliNotas').value=c.notas||'';
+      document.getElementById('cliId').value=c.id;
+      document.getElementById('titCliente').textContent='Modificar Cliente';
+    }
+  }
+  openOv('ovCliente');
+}
+function editCli(id){openCliente(id);}
+function saveCliente(){
+  var razon=document.getElementById('cliRazon').value.trim();
+  if(!razon){alert('Ingrese el nombre o razón social.');return;}
+  var id=parseInt(document.getElementById('cliId').value);
+  var abogadoId=parseInt(document.getElementById('cliAbogado').value)||null;
+  var tarTipo=document.getElementById('cliTarTipo').value;
+  var tarValor=parseFloat(document.getElementById('cliTarValor').value)||0;
+  var prev=id?DB.clientes.find(function(x){return x.id===id;}):null;
+  var obj={tipo:document.getElementById('cliTipo').value,ruc:document.getElementById('cliRuc').value.trim(),razonSocial:razon,estado:document.getElementById('cliEstado').value.trim(),tipoContrib:document.getElementById('cliTipoContrib').value.trim(),direccion:document.getElementById('cliDir').value.trim(),telefono:document.getElementById('cliTel').value.trim(),email:document.getElementById('cliEmail').value.trim(),contacto:document.getElementById('cliContacto').value.trim(),abogadoId:abogadoId,tarifaTipo:tarTipo,tarifaValor:tarValor,notas:document.getElementById('cliNotas').value.trim()};
+  obj.id = id ? id : nid(DB.clientes);
+  obj.codigo = (prev&&prev.codigo)?prev.codigo:nextCodigoCliente();
+  if(tarValor>0){
+    var tarId=(prev&&prev.tarifaId)?prev.tarifaId:null;
+    var tobj={id:tarId||nid(DB.tarifas),nombre:'Tarifa '+obj.codigo,tipo:tarTipo,valor:tarValor,desc:'',abogados:[]};
+    var ti=tarId?DB.tarifas.findIndex(function(t){return t.id===tarId;}):-1;
+    if(ti>=0)DB.tarifas[ti]=tobj;else DB.tarifas.push(tobj);
+    obj.tarifaId=tobj.id;
+  } else { obj.tarifaId=(prev&&prev.tarifaId)||null; }
+  if(id){var i=DB.clientes.findIndex(function(x){return x.id===id;});if(i>=0)DB.clientes[i]=obj;}else{DB.clientes.push(obj);}
+  save();closeOv('ovCliente');renderClientes();
+}
+function delCli(id){
+  var c=DB.clientes.find(function(x){return x.id===id;});
+  confirm2('¿Borrar el cliente "'+c.razonSocial+'"?','Los proyectos y registros asociados se conservarán.',function(){DB.clientes=DB.clientes.filter(function(x){return x.id!==id;});save();renderClientes();});
+}
+
+/* ═══════════════════════ PROYECTOS ═══════════════════════ */
+function fillFiltCliProy(){
+  fillSel2Cli('filtCliProy',false);
+}
+function renderProyectos(){
+  var tb=document.getElementById('bodyProy');
+  var lista=[].concat(DB.proyectos);
+  var busq=(document.getElementById('filtBusqProy').value||'').toLowerCase();
+  var cliId=parseInt(document.getElementById('filtCliProy').value);
+  var est=document.getElementById('filtEstProy').value;
+  if(busq)lista=lista.filter(function(p){return(p.nombre||'').toLowerCase().indexOf(busq)>=0;});
+  if(cliId)lista=lista.filter(function(p){return p.clienteId===cliId;});
+  if(est)lista=lista.filter(function(p){return p.estado===est;});
+  if(!lista.length){tb.innerHTML='<tr><td colspan="9" class="empty">No hay proyectos registrados</td></tr>';return;}
+  tb.innerHTML='';
+  var colorEst={Activo:'b-green',Finalizado:'b-hora',Suspendido:'b-red',Pendiente:'b-amber'};
+  lista.forEach(function(p,i){
+    var tr=document.createElement('tr');
+    tr.innerHTML='<td>'+(i+1)+'</td>'+
+      '<td><strong>'+esc(p.nombre)+'</strong></td>'+
+      '<td>'+(p.clienteId?esc(nomCli(p.clienteId)):'—')+'</td>'+
+      '<td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(p.descripcion||'—')+'</td>'+
+      '<td>'+(p.fini?fmtDate(p.fini):'—')+'</td>'+
+      '<td>'+(p.ffin?fmtDate(p.ffin):'—')+'</td>'+
+      '<td><span class="badge '+(colorEst[p.estado]||'b-cat')+'">'+esc(p.estado)+'</span></td>'+
+      '<td>'+(p.monto?fmtS(p.monto):'—')+'</td>'+
+      '<td><div class="acts"><button class="btn btn-amber btn-sm" onclick="editProy('+p.id+')">✏</button><button class="btn btn-red btn-sm" onclick="delProy('+p.id+')">🗑</button></div></td>';
+    tb.appendChild(tr);
+  });
+}
+function limpFiltProy(){['filtBusqProy','filtCliProy','filtEstProy'].forEach(function(f){document.getElementById(f).value='';});renderProyectos();}
+
+function openProyecto(id){
+  ['proyNom','proyDesc','proyFini','proyFfin','proyNotas'].forEach(function(f){document.getElementById(f).value='';});
+  document.getElementById('proyMonto').value='';document.getElementById('proyEstado').value='Activo';
+  document.getElementById('proyId').value='';document.getElementById('titProyecto').textContent='Nuevo Proyecto / Trabajo';
+  var sCli=document.getElementById('proyCliente');sCli.innerHTML='<option value="">— Seleccionar cliente —</option>';
+  DB.clientes.forEach(function(c){sCli.innerHTML+='<option value="'+c.id+'">'+esc(c.razonSocial)+'</option>';});
+  var sAb=document.getElementById('proyAbogado');sAb.innerHTML='<option value="">— Sin asignar —</option>';
+  DB.abogados.forEach(function(a){sAb.innerHTML+='<option value="'+a.id+'">'+esc(a.nombre)+'</option>';});
+  if(id){
+    var p=DB.proyectos.find(function(x){return x.id===id;});
+    if(p){
+      document.getElementById('proyNom').value=p.nombre||'';
+      document.getElementById('proyCliente').value=p.clienteId||'';
+      document.getElementById('proyDesc').value=p.descripcion||'';
+      document.getElementById('proyFini').value=p.fini||'';
+      document.getElementById('proyFfin').value=p.ffin||'';
+      document.getElementById('proyEstado').value=p.estado||'Activo';
+      document.getElementById('proyMonto').value=p.monto||'';
+      document.getElementById('proyAbogado').value=p.abogadoId||'';
+      document.getElementById('proyNotas').value=p.notas||'';
+      document.getElementById('proyId').value=p.id;
+      document.getElementById('titProyecto').textContent='Modificar Proyecto / Trabajo';
+    }
+  }
+  openOv('ovProyecto');
+}
+function editProy(id){openProyecto(id);}
+function saveProyecto(){
+  var nom=document.getElementById('proyNom').value.trim();if(!nom){alert('Ingrese el nombre del proyecto.');return;}
+  var cliId=parseInt(document.getElementById('proyCliente').value);if(!cliId){alert('Seleccione un cliente.');return;}
+  var id=parseInt(document.getElementById('proyId').value);
+  var obj={nombre:nom,clienteId:cliId,descripcion:document.getElementById('proyDesc').value.trim(),fini:document.getElementById('proyFini').value,ffin:document.getElementById('proyFfin').value,estado:document.getElementById('proyEstado').value,monto:parseFloat(document.getElementById('proyMonto').value)||0,abogadoId:parseInt(document.getElementById('proyAbogado').value)||null,notas:document.getElementById('proyNotas').value.trim()};
+  if(id){var i=DB.proyectos.findIndex(function(x){return x.id===id;});if(i>=0){obj.id=id;DB.proyectos[i]=obj;}}else{obj.id=nid(DB.proyectos);DB.proyectos.push(obj);}
+  save();closeOv('ovProyecto');renderProyectos();
+}
+function delProy(id){
+  var p=DB.proyectos.find(function(x){return x.id===id;});
+  confirm2('¿Borrar el proyecto "'+p.nombre+'"?','Los registros de tiempo asociados se conservarán.',function(){DB.proyectos=DB.proyectos.filter(function(x){return x.id!==id;});save();renderProyectos();});
+}
+
+/* ═══════════════════════ REPORTES ═══════════════════════ */
+function fillRepSelects(){
+  fillSel('rpAb',DB.abogados,'nombre','Todos');
+  fillSel('rpAct',DB.actividades,'nombre','Todas');
+  fillSel2Cli('rpCli',false);
+}
+function renderRep(){
+  fillRepSelects();
+  var regs=[].concat(DB.registros);
+  var fd=document.getElementById('rpDesde').value,fh=document.getElementById('rpHasta').value;
+  var abId=parseInt(document.getElementById('rpAb').value),actId=parseInt(document.getElementById('rpAct').value);
+  var cliId=parseInt(document.getElementById('rpCli').value),tipo=document.getElementById('rpTipo').value;
+  if(fd)regs=regs.filter(function(r){return r.fecha>=fd;});
+  if(fh)regs=regs.filter(function(r){return r.fecha<=fh;});
+  if(abId)regs=regs.filter(function(r){return r.abogadoId===abId;});
+  if(actId)regs=regs.filter(function(r){return r.actividadId===actId;});
+  if(cliId)regs=regs.filter(function(r){return r.clienteId===cliId;});
+  if(tipo)regs=regs.filter(function(r){return r.tipo===tipo;});
+  regs.sort(function(a,b){return b.fecha.localeCompare(a.fecha);});
+  var totH=0,totM=0,tb=document.getElementById('bodyRep');tb.innerHTML='';
+  if(!regs.length){tb.innerHTML='<tr><td colspan="9" class="empty">No hay registros</td></tr>';}
+  else{regs.forEach(function(r){
+    totH+=parseFloat(r.horas)||0;totM+=parseFloat(r.monto)||0;
+    var tr=document.createElement('tr');
+    tr.innerHTML='<td>'+fmtDate(r.fecha)+'</td><td>'+esc(nomAb(r.abogadoId))+'</td><td>'+esc(nomAct(r.actividadId))+'</td>'+
+      '<td>'+(r.clienteId?esc(nomCli(r.clienteId)):'—')+'</td><td>'+(r.proyectoId?esc(nomProy(r.proyectoId)):'—')+'</td>'+
+      '<td>'+esc(nomTar(r.tarifaId))+'</td><td>'+(r.horas||'—')+'</td><td>'+fmtS(r.monto)+'</td>'+
+      '<td><span class="badge '+(r.tipo==='timer'?'b-green':'b-hora')+'">'+(r.tipo==='timer'?'⏱ Cronómetro':'✏ Manual')+'</span></td>';
+    tb.appendChild(tr);
+  });}
+  document.getElementById('footRep').innerHTML='<tr class="tfoot-row"><td colspan="6"><strong>TOTALES</strong></td><td><strong>'+totH.toFixed(2)+' hrs</strong></td><td><strong>'+fmtS(totM)+'</strong></td><td></td></tr>';
+  var totHG=DB.registros.reduce(function(s,r){return s+(parseFloat(r.horas)||0);},0);
+  var totMG=DB.registros.reduce(function(s,r){return s+(parseFloat(r.monto)||0);},0);
+  document.getElementById('kpiReportes').innerHTML=
+    kpi('📋','Registros',DB.registros.length)+kpi('⏱','Horas cronóm.',DB.registros.filter(function(r){return r.tipo==='timer';}).reduce(function(s,r){return s+(parseFloat(r.horas)||0);},0).toFixed(1)+' h')+
+    kpi('✏','Horas manual',DB.registros.filter(function(r){return r.tipo==='manual';}).reduce(function(s,r){return s+(parseFloat(r.horas)||0);},0).toFixed(1)+' h')+
+    kpi('⌛','Total horas',totHG.toFixed(1)+' h')+kpi('💵','Total facturado',fmtS(totMG));
+  // Resumen abogado
+  var tb2=document.getElementById('bodyResAb');tb2.innerHTML='';
+  DB.abogados.forEach(function(a){
+    var ra=DB.registros.filter(function(r){return r.abogadoId===a.id;});
+    var h=ra.reduce(function(s,r){return s+(parseFloat(r.horas)||0);},0);
+    var m=ra.reduce(function(s,r){return s+(parseFloat(r.monto)||0);},0);
+    var tr=document.createElement('tr');
+    tr.innerHTML='<td><strong>'+esc(a.nombre)+'</strong></td><td>'+esc(a.especialidad||'—')+'</td><td>'+ra.length+'</td><td>'+h.toFixed(2)+' hrs</td><td>'+fmtS(m)+'</td>';
+    tb2.appendChild(tr);
+  });
+  if(!DB.abogados.length)document.getElementById('bodyResAb').innerHTML='<tr><td colspan="5" class="empty">Sin abogados</td></tr>';
+  // Resumen cliente
+  var tb3=document.getElementById('bodyResCli');tb3.innerHTML='';
+  DB.clientes.forEach(function(c){
+    var rc=DB.registros.filter(function(r){return r.clienteId===c.id;});
+    var pc=DB.proyectos.filter(function(p){return p.clienteId===c.id;});
+    var h=rc.reduce(function(s,r){return s+(parseFloat(r.horas)||0);},0);
+    var m=rc.reduce(function(s,r){return s+(parseFloat(r.monto)||0);},0);
+    var tr=document.createElement('tr');
+    tr.innerHTML='<td><strong>'+esc(c.razonSocial)+'</strong></td><td>'+esc(c.ruc||'—')+'</td><td>'+pc.length+'</td><td>'+rc.length+'</td><td>'+h.toFixed(2)+' hrs</td><td>'+fmtS(m)+'</td>';
+    tb3.appendChild(tr);
+  });
+  if(!DB.clientes.length)document.getElementById('bodyResCli').innerHTML='<tr><td colspan="6" class="empty">Sin clientes</td></tr>';
+}
+function limpFiltRep(){['rpDesde','rpHasta','rpAb','rpAct','rpCli','rpTipo'].forEach(function(f){document.getElementById(f).value='';});renderRep();}
+var tarifaReturn=null;
+function nuevaTarifaDesdeAbogado(){tarifaReturn='abogado';openTarifa();}
+function cancelarTarifa(){tarifaReturn=null;closeOv('ovTarifa');}
+function receptoresRHE(){
+  var map={};
+  (DB.ingresos||[]).forEach(function(x){
+    var ruc=(x.ruc||'').trim();var nom=(x.cliente||'').trim();
+    var key=ruc||('n:'+nom.toLowerCase());
+    if(key==='n:'||!key)return;
+    if(!map[key])map[key]={ruc:ruc,nombre:nom};
+    if(!map[key].nombre&&nom)map[key].nombre=nom;
+  });
+  return Object.keys(map).map(function(k){return map[k];}).sort(function(a,b){return(a.nombre||a.ruc).localeCompare(b.nombre||b.ruc);});
+}
+function initLiquidacion(){renderLiquidaciones();}
+function liqReceptorSel(){
+  var v=document.getElementById('liqCliente').value;
+  if(!v)return null;
+  if(v.indexOf('n:')===0)return {ruc:'',nombre:v.slice(2)};
+  var r=receptoresRHE().find(function(x){return x.ruc===v;});
+  return {ruc:v,nombre:r?r.nombre:''};
+}
+function clienteIdsPorReceptor(rec){
+  var ids=[];if(!rec)return ids;
+  DB.clientes.forEach(function(c){
+    if(rec.ruc){if((c.ruc||'').trim()===rec.ruc)ids.push(c.id);}
+    else if(rec.nombre){if((c.razonSocial||'').trim().toLowerCase()===rec.nombre.toLowerCase())ids.push(c.id);}
+  });
+  return ids;
+}
+function fmtHoras(h){h=parseFloat(h)||0;var hh=Math.floor(h+1e-9);var mm=Math.round((h-hh)*60);if(mm===60){hh++;mm=0;}var s='';if(hh)s+=hh+' h';if(mm)s+=(s?' ':'')+mm+' m';return s||'0 h';}
+function horasHHMM(dec){dec=parseFloat(dec)||0;var h=Math.floor(dec+1e-9);var m=Math.round((dec-h)*60);if(m===60){h++;m=0;}return (h<10?'0':'')+h+':'+(m<10?'0':'')+m;}
+function parseHoras(str){if(str==null)return 0;var s=String(str).trim().toLowerCase().replace(/hrs?/g,'').replace(/\s/g,'');if(!s)return 0;s=s.replace('h',':');if(s.indexOf(':')>=0){var p=s.split(':');var h=parseInt(p[0],10)||0;var m=parseInt(p[1]||'0',10)||0;return Math.round((h+m/60)*100)/100;}return parseFloat(s.replace(',','.'))||0;}
+function llenarReceptores(sel,valSel){
+  sel.innerHTML='<option value="">— Seleccionar —</option>';
+  receptoresRHE().forEach(function(r){var val=r.ruc||('n:'+r.nombre);sel.innerHTML+='<option value="'+esc(val)+'">'+esc(r.nombre||r.ruc)+(r.ruc?' ('+esc(r.ruc)+')':'')+'</option>';});
+  if(valSel!=null)sel.value=valSel;
+}
+function renderLiquidaciones(){
+  var tb=document.getElementById('bodyLiqReg');if(!tb)return;tb.innerHTML='';
+  var lista=(DB.liquidaciones||[]).slice().sort(function(a,b){return(b.fecha||'').localeCompare(a.fecha||'');});
+  if(!lista.length){tb.innerHTML='<tr><td colspan="8" class="empty">No hay liquidaciones registradas. Usa «Nueva liquidación».</td></tr>';return;}
+  lista.forEach(function(L,i){
+    var totH=(L.items||[]).reduce(function(s,it){return s+(parseFloat(it.horas)||0);},0);
+    var mt=parseFloat(L.montoTotal)||0;var pagar=mt-Math.round(mt*0.08*100)/100;
+    var tr=document.createElement('tr');
+    tr.innerHTML='<td>'+(i+1)+'</td><td><strong>'+esc(L.asunto||'—')+'</strong></td><td style="font-size:12px">'+esc(L.receptorNombre||L.receptorRuc||'—')+'</td><td class="nowrap">'+fmtDate(L.fecha)+'</td>'+
+      '<td class="num">'+totH.toFixed(2)+'</td><td class="num">'+fmtS(mt)+'</td><td class="num"><strong>'+fmtS(pagar)+'</strong></td>'+
+      '<td class="nowrap"><div style="display:flex;gap:5px;flex-wrap:nowrap"><button class="btn btn-gold" style="padding:6px 11px;font-size:14px" onclick="imprimirLiq('+L.id+')" title="Imprimir / PDF">🖨</button><button class="btn btn-amber" style="padding:6px 11px;font-size:14px" onclick="editLiq('+L.id+')" title="Modificar">✏</button><button class="btn btn-red" style="padding:6px 11px;font-size:14px" onclick="delLiq('+L.id+')" title="Borrar">🗑</button></div></td>';
+    tb.appendChild(tr);
+  });
+}
+function liqAddItem(fecha,desc,horas){
+  var tb=document.getElementById('liqItems');
+  var tr=document.createElement('tr');
+  tr.innerHTML='<td><input type="date" class="li-fecha" value="'+(fecha||'')+'" style="width:100%"></td>'+
+    '<td><textarea class="li-desc" rows="2" style="width:100%;resize:vertical">'+esc(desc||'')+'</textarea></td>'+
+    '<td><input type="text" class="li-horas" placeholder="01:30" value="'+(horas!=null&&horas!==''?horasHHMM(horas):'')+'" style="width:100%;text-align:center" oninput="liqRecalc()"></td>'+
+    '<td style="text-align:center"><button type="button" class="btn btn-red btn-sm" onclick="this.closest(\'tr\').remove();liqRecalc();">✕</button></td>';
+  tb.appendChild(tr);
+}
+function liqTraerHoras(){
+  var v=document.getElementById('liqRecep').value;
+  if(!v){alert('Seleccione primero la empresa/persona.');return;}
+  var rec=(v.indexOf('n:')===0)?{ruc:'',nombre:v.slice(2)}:{ruc:v,nombre:''};
+  var ids=clienteIdsPorReceptor(rec);
+  var regs=(DB.registros||[]).filter(function(r){return ids.indexOf(r.clienteId)>=0;}).sort(function(a,b){return(a.fecha||'').localeCompare(b.fecha||'');});
+  if(!regs.length){alert('No hay horas registradas para ese cliente. Agrégalas manualmente con «+ Agregar fila».');return;}
+  regs.forEach(function(r){var d=(r.descripcion||'').trim();var det=nomAct(r.actividadId)+(d?' — '+d:'');liqAddItem(r.fecha,det,r.horas);});
+  liqRecalc();
+}
+function liqRecalcNeto(){
+  var mt=parseFloat(document.getElementById('liqMontoTotal').value)||0;
+  var ret=Math.round(mt*0.08*100)/100;
+  document.getElementById('liqRet').value=ret.toFixed(2);
+  document.getElementById('liqPagar').value=(mt-ret).toFixed(2);
+}
+function liqTotalHoras(){var tot=0;document.querySelectorAll('#liqItems .li-horas').forEach(function(inp){tot+=parseHoras(inp.value);});return tot;}
+function liqEsPanaAutos(){
+  var v=document.getElementById('liqRecep').value||'';
+  if(v==='20536429183')return true;
+  var rec=(v.indexOf('n:')===0)?v.slice(2):((receptoresRHE().find(function(x){return x.ruc===v;})||{}).nombre||'');
+  return /pana\s*autos/i.test(rec);
+}
+function liqRecalcTot(){document.getElementById('liqTotHoras').value=liqTotalHoras().toFixed(2);var el=document.getElementById('liqRegla');if(el)el.style.display=liqEsPanaAutos()?'block':'none';liqRecalcNeto();}
+function liqRecalc(){
+  var tot=liqTotalHoras();
+  document.getElementById('liqTotHoras').value=tot.toFixed(2);
+  var vh=parseFloat(document.getElementById('liqValorHora').value)||0;
+  var base=tot*vh;
+  var pana=liqEsPanaAutos();
+  document.getElementById('liqMontoTotal').value=(pana?(base/0.92):base).toFixed(2);
+  var el=document.getElementById('liqRegla');if(el)el.style.display=pana?'block':'none';
+  liqRecalcNeto();
+}
+function openLiquidacion(id){
+  document.getElementById('liqAsunto').value='';
+  document.getElementById('liqValorHora').value='';
+  document.getElementById('liqMontoTotal').value='';
+  document.getElementById('liqTotHoras').value='0.00';
+  document.getElementById('liqRet').value='';document.getElementById('liqPagar').value='';
+  document.getElementById('liqItems').innerHTML='';
+  document.getElementById('liqId').value='';
+  document.getElementById('titLiquidacion').textContent='Nueva Liquidación';
+  llenarReceptores(document.getElementById('liqRecep'),'');
+  if(id){
+    var L=(DB.liquidaciones||[]).find(function(x){return x.id===id;});
+    if(L){
+      document.getElementById('liqAsunto').value=L.asunto||'';
+      document.getElementById('liqRecep').value=L.receptorRuc?L.receptorRuc:(L.receptorNombre?('n:'+L.receptorNombre):'');
+      document.getElementById('liqValorHora').value=(L.valorHora!=null?L.valorHora:'');
+      (L.items||[]).forEach(function(it){liqAddItem(it.fecha,it.descripcion,it.horas);});
+      document.getElementById('liqMontoTotal').value=(L.montoTotal!=null?L.montoTotal:'');
+      document.getElementById('liqId').value=L.id;
+      document.getElementById('titLiquidacion').textContent='Modificar Liquidación';
+      liqRecalcTot();
+    }
+  } else { liqAddItem('','',''); liqRecalc(); }
+  openOv('ovLiquidacion');
+}
+function editLiq(id){openLiquidacion(id);}
+function delLiq(id){confirm2('¿Borrar esta liquidación?','',function(){DB.liquidaciones=(DB.liquidaciones||[]).filter(function(x){return x.id!==id;});save();renderLiquidaciones();});}
+function saveLiquidacion(){
+  var asunto=document.getElementById('liqAsunto').value.trim();
+  if(!asunto){alert('Ingrese el asunto / operación.');return;}
+  var v=document.getElementById('liqRecep').value;
+  if(!v){alert('Seleccione la empresa/persona (receptor del recibo).');return;}
+  var rec=(v.indexOf('n:')===0)?{ruc:'',nombre:v.slice(2)}:{ruc:v,nombre:(receptoresRHE().find(function(x){return x.ruc===v;})||{}).nombre||''};
+  var items=[];
+  document.querySelectorAll('#liqItems tr').forEach(function(tr){
+    var f=tr.querySelector('.li-fecha').value;
+    var d=tr.querySelector('.li-desc').value.trim();
+    var h=parseHoras(tr.querySelector('.li-horas').value);
+    if(f||d||h)items.push({fecha:f,descripcion:d,horas:h});
+  });
+  if(!items.length){alert('Agregue al menos una fila de detalle (fecha, descripción, horas).');return;}
+  if(!DB.liquidaciones)DB.liquidaciones=[];
+  var obj={asunto:asunto,receptorRuc:rec.ruc,receptorNombre:rec.nombre,valorHora:parseFloat(document.getElementById('liqValorHora').value)||0,montoTotal:parseFloat(document.getElementById('liqMontoTotal').value)||0,items:items,fecha:today()};
+  var id=parseInt(document.getElementById('liqId').value);
+  if(id){var i=DB.liquidaciones.findIndex(function(x){return x.id===id;});if(i>=0){obj.id=id;obj.fecha=DB.liquidaciones[i].fecha||today();DB.liquidaciones[i]=obj;}}else{obj.id=nid(DB.liquidaciones);DB.liquidaciones.push(obj);}
+  save();closeOv('ovLiquidacion');renderLiquidaciones();
+}
+function imprimirLiq(id){
+  var L=(DB.liquidaciones||[]).find(function(x){return x.id===id;});if(!L)return;
+  var items=L.items||[];var totH=items.reduce(function(s,it){return s+(parseFloat(it.horas)||0);},0);
+  var mt=parseFloat(L.montoTotal)||0;var ret=Math.round(mt*0.08*100)/100;var pagar=mt-ret;
+  var filas='';
+  items.forEach(function(it){filas+='<tr><td class="c nowrap">'+fmtDate(it.fecha)+'</td><td>'+esc(it.descripcion||'')+'</td><td class="c nowrap">'+fmtHoras(it.horas)+'</td></tr>';});
+  var meta=[];
+  meta.push('<strong>Cliente:</strong> '+esc(L.receptorNombre||'—')+(L.receptorRuc?' &nbsp;&middot;&nbsp; <strong>RUC/DNI:</strong> '+esc(L.receptorRuc):''));
+  meta.push('<strong>Emitido:</strong> '+fmtDate(today()));
+  var html='<!DOCTYPE html><html lang="es"><head><meta charset="utf-8"><title>Liquidación de horas por servicios legales</title>'+
+    '<style>*{box-sizing:border-box;font-family:\'Segoe UI\',Arial,sans-serif;}body{margin:32px;color:#1a2744;}'+
+    '.hd{display:flex;align-items:center;gap:12px;border-bottom:3px solid #b8860b;padding-bottom:12px;}'+
+    '.hd .logo{font-size:32px;}.hd h2{margin:0;font-size:16px;}.hd p{margin:0;font-size:12px;color:#6b7280;}'+
+    'h1{font-size:16px;text-align:center;margin:18px 0 2px;}'+
+    '.sub{text-align:center;font-size:13px;color:#374151;margin:0 0 12px;font-weight:600;}'+
+    '.meta{font-size:12px;color:#374151;text-align:center;margin-bottom:14px;line-height:1.7;}'+
+    'table{width:100%;border-collapse:collapse;font-size:12px;}'+
+    'th{background:#1a2744;color:#fff;padding:8px;text-align:left;}th.c{text-align:center;}'+
+    'td{padding:7px 8px;border:1px solid #e5e7eb;vertical-align:top;}td.c{text-align:center;}td.nowrap{white-space:nowrap;}td.r{text-align:right;}'+
+    'tfoot td{font-weight:700;background:#f1f5f9;}'+
+    '.tot{margin:14px 0 0 auto;width:290px;font-size:13px;}'+
+    '.tot>div{display:flex;justify-content:space-between;padding:5px 8px;border-bottom:1px solid #e5e7eb;}'+
+    '.tot .big{font-weight:800;background:#fef3c7;border-bottom:none;}'+
+    '.firma{margin-top:56px;display:flex;justify-content:space-around;font-size:12px;text-align:center;}'+
+    '.firma div{border-top:1px solid #1a2744;padding-top:6px;width:230px;}'+
+    '.noprint{margin-bottom:16px;}button{background:#1a2744;color:#fff;border:none;padding:9px 16px;border-radius:6px;cursor:pointer;font-weight:700;}'+
+    '@media print{.noprint{display:none;}body{margin:0;}}'+
+    '</style></head><body>'+
+    '<div class="noprint"><button onclick="window.print()">🖨 Imprimir / Guardar PDF</button></div>'+
+    '<div class="hd"><div class="logo">⚖</div><div><h2>Consultorias Integrales</h2><p>Sistema de Gestión de Tiempos y Servicios Legales</p></div></div>'+
+    '<h1>Liquidación de horas por servicios legales</h1>'+
+    '<div class="sub">'+esc(L.asunto||'')+'</div>'+
+    '<div class="meta">'+meta.join(' &nbsp;·&nbsp; ')+'</div>'+
+    '<table><thead><tr><th class="c">FECHA</th><th>DESCRIPCIÓN</th><th class="c">TIEMPO (horas)</th></tr></thead>'+
+    '<tbody>'+filas+'</tbody>'+
+    '<tfoot><tr><td></td><td class="r">TOTAL</td><td class="c">'+fmtHoras(totH)+'</td></tr></tfoot></table>'+
+    '<div class="tot">'+
+    (L.valorHora?'<div><span>Valor hora</span><span>'+fmtS(L.valorHora)+'</span></div>':'')+
+    '<div><span>Monto total</span><span>'+fmtS(mt)+'</span></div>'+
+    '<div><span>Retención 8%</span><span>'+fmtS(ret)+'</span></div>'+
+    '<div class="big"><span>Monto a pagar</span><span>'+fmtS(pagar)+'</span></div>'+
+    '</div>'+
+    '<div class="firma"><div>Elaborado por</div><div>Conforme</div></div>'+
+    '</body></html>';
+  var win=window.open('','_blank');
+  if(!win){alert('Permite las ventanas emergentes para ver la liquidación.');return;}
+  win.document.open();win.document.write(html);win.document.close();
+}
+function liqFiltrados(){
+  var rec=liqReceptorSel();var ids=clienteIdsPorReceptor(rec);
+  var fd=document.getElementById('liqDesde').value,fh=document.getElementById('liqHasta').value;
+  var regs=(DB.registros||[]).filter(function(r){return ids.indexOf(r.clienteId)>=0;});
+  if(fd)regs=regs.filter(function(r){return r.fecha>=fd;});
+  if(fh)regs=regs.filter(function(r){return r.fecha<=fh;});
+  regs.sort(function(a,b){return(a.fecha||'').localeCompare(b.fecha||'');});
+  return regs;
+}
+function limpLiq(){['liqCliente','liqDesde','liqHasta'].forEach(function(f){document.getElementById(f).value='';});renderLiquidacion();}
+function renderLiquidacion(){
+  var tb=document.getElementById('bodyLiq');if(!tb)return;tb.innerHTML='';
+  var foot=document.getElementById('footLiq');
+  var rec=liqReceptorSel();
+  if(!rec){tb.innerHTML='<tr><td colspan="4" class="empty">Seleccione una empresa/persona para ver su liquidación.</td></tr>';foot.innerHTML='';return;}
+  var regs=liqFiltrados();var totH=0,totM=0;
+  if(!regs.length){tb.innerHTML='<tr><td colspan="4" class="empty">No hay horas/actividades registradas para «'+esc(rec.nombre||rec.ruc)+'» en el período.</td></tr>';foot.innerHTML='';return;}
+  regs.forEach(function(r){
+    var h=parseFloat(r.horas)||0,m=parseFloat(r.monto)||0;totH+=h;totM+=m;
+    var d=(r.descripcion||'').trim();var detalle=esc(nomAct(r.actividadId))+(d?' — '+esc(d):'');
+    var tr=document.createElement('tr');
+    tr.innerHTML='<td class="nowrap">'+fmtDate(r.fecha)+'</td><td>'+detalle+'</td><td class="num">'+h.toFixed(2)+'</td><td class="num">'+fmtS(m)+'</td>';
+    tb.appendChild(tr);
+  });
+  foot.innerHTML='<tr class="tfoot-row"><td colspan="2" style="text-align:right"><strong>TOTALES</strong></td><td class="num"><strong>'+totH.toFixed(2)+'</strong></td><td class="num"><strong>'+fmtS(totM)+'</strong></td></tr>';
+}
+function imprimirLiquidacion(){
+  var rec=liqReceptorSel();
+  if(!rec){alert('Seleccione una empresa/persona.');return;}
+  var regs=liqFiltrados();
+  if(!regs.length){alert('No hay horas/actividades para liquidar con los filtros actuales.');return;}
+  var totH=0,totM=0,filas='';
+  regs.forEach(function(r,i){
+    var h=parseFloat(r.horas)||0,m=parseFloat(r.monto)||0;totH+=h;totM+=m;
+    var act=nomAct(r.actividadId);var d=(r.descripcion||'').trim();
+    var detalle=esc(act)+(d?' — '+esc(d):'');
+    filas+='<tr><td class="c">'+(i+1)+'</td><td class="c">'+fmtDate(r.fecha)+'</td><td>'+detalle+'</td><td class="r">'+h.toFixed(2)+'</td><td class="r">'+fmtS(m)+'</td></tr>';
+  });
+  var fd=document.getElementById('liqDesde').value,fh=document.getElementById('liqHasta').value;
+  var meta=[];
+  meta.push('<strong>Cliente:</strong> '+esc(rec.nombre||'—')+(rec.ruc?' &nbsp;&middot;&nbsp; <strong>RUC/DNI:</strong> '+esc(rec.ruc):''));
+  if(fd||fh)meta.push('<strong>Per&iacute;odo:</strong> '+(fd?fmtDate(fd):'inicio')+' al '+(fh?fmtDate(fh):'hoy'));
+  meta.push('<strong>Emitido:</strong> '+fmtDate(today()));
+  var html='<!DOCTYPE html><html lang="es"><head><meta charset="utf-8"><title>Liquidación de horas por servicios legales</title>'+
+    '<style>*{box-sizing:border-box;font-family:\'Segoe UI\',Arial,sans-serif;}body{margin:32px;color:#1a2744;}'+
+    '.hd{display:flex;align-items:center;gap:12px;border-bottom:3px solid #b8860b;padding-bottom:12px;}'+
+    '.hd .logo{font-size:32px;}.hd h2{margin:0;font-size:16px;}.hd p{margin:0;font-size:12px;color:#6b7280;}'+
+    'h1{font-size:18px;text-align:center;margin:18px 0 6px;}'+
+    '.meta{font-size:12px;color:#374151;text-align:center;margin-bottom:16px;line-height:1.8;}'+
+    'table{width:100%;border-collapse:collapse;font-size:12px;}'+
+    'th{background:#1a2744;color:#fff;padding:8px;text-align:left;}th.r{text-align:right;}th.c{text-align:center;}'+
+    'td{padding:7px 8px;border-bottom:1px solid #e5e7eb;vertical-align:top;}'+
+    'td.r{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap;}td.c{text-align:center;white-space:nowrap;}'+
+    'tfoot td{font-weight:700;background:#f1f5f9;border-top:2px solid #cbd5e1;}'+
+    '.firma{margin-top:64px;display:flex;justify-content:space-around;font-size:12px;text-align:center;}'+
+    '.firma div{border-top:1px solid #1a2744;padding-top:6px;width:230px;}'+
+    '.noprint{margin-bottom:16px;}button{background:#1a2744;color:#fff;border:none;padding:9px 16px;border-radius:6px;cursor:pointer;font-weight:700;}'+
+    '@media print{.noprint{display:none;}body{margin:0;}}'+
+    '</style></head><body>'+
+    '<div class="noprint"><button onclick="window.print()">🖨 Imprimir / Guardar PDF</button></div>'+
+    '<div class="hd"><div class="logo">⚖</div><div><h2>Consultorias Integrales</h2><p>Sistema de Gestión de Tiempos y Servicios Legales</p></div></div>'+
+    '<h1>Liquidación de horas por servicios legales</h1>'+
+    '<div class="meta">'+meta.join(' &nbsp;&middot;&nbsp; ')+'</div>'+
+    '<table><thead><tr><th class="c">N°</th><th class="c">Fecha</th><th>Descripción de la actividad</th><th class="r">Horas</th><th class="r">Monto (S/)</th></tr></thead>'+
+    '<tbody>'+filas+'</tbody>'+
+    '<tfoot><tr><td colspan="3" class="r">TOTALES</td><td class="r">'+totH.toFixed(2)+'</td><td class="r">'+fmtS(totM)+'</td></tr></tfoot></table>'+
+    '<div class="firma"><div>Elaborado por</div><div>Conforme</div></div>'+
+    '</body></html>';
+  var win=window.open('','_blank');
+  if(!win){alert('Permite las ventanas emergentes para ver la liquidación.');return;}
+  win.document.open();win.document.write(html);win.document.close();
+}
+function exportRepCSV(){
+  var rows=[['Fecha','Abogado','Actividad','Cliente','Proyecto','Tarifa','Horas','Monto S/','Tipo']];
+  var regs=[].concat(DB.registros);
+  regs.sort(function(a,b){return b.fecha.localeCompare(a.fecha);});
+  regs.forEach(function(r){rows.push([fmtDate(r.fecha),nomAb(r.abogadoId),nomAct(r.actividadId),r.clienteId?nomCli(r.clienteId):'',r.proyectoId?nomProy(r.proyectoId):'',nomTar(r.tarifaId),r.horas,r.monto,r.tipo]);});
+  dlCSV(rows,'reporte_pardo_caballero.csv');
+}
+
+/* ═══════════════════════ PORTABILIDAD ═══════════════════════ */
+function exportarDatos(){
+  DB._lastBackup=today();save();
+  var b=new Blob([JSON.stringify(DB,null,2)],{type:'application/json'});
+  var a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='pardo_caballero_'+today()+'.json';a.click();
+  setTimeout(function(){URL.revokeObjectURL(a.href);},1000);
+}
+function importarDatos(input){
+  var file=input.files[0];if(!file)return;
+  var r=new FileReader();
+  r.onload=function(e){
+    try{
+      var d=JSON.parse(e.target.result);
+      if(!d.registros||!d.abogados){alert('❌ Archivo inválido.');return;}
+      if(!d.clientes)d.clientes=[];if(!d.proyectos)d.proyectos=[];if(!d.ingresos)d.ingresos=[];if(!d.gastos)d.gastos=[];if(!d.liquidaciones)d.liquidaciones=[];
+      if(confirm('¿Importar? Esto REEMPLAZARÁ todos los datos actuales en esta computadora.')){DB=d;save();renderResumen();updateBackupInfo();alert('✅ Datos importados.');}
+    }catch(err){alert('❌ Error: '+err.message);}
+    input.value='';
+  };r.readAsText(file);
+}
+
+/* ═══════════════════════ FINANZAS: COMUNES ═══════════════════════ */
+var MESES_LBL=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Setiembre','Octubre','Noviembre','Diciembre'];
+var GASTO_CATS=['Alimentación','Transporte / Movilidad','Servicios (luz, agua, internet)','Vivienda / Alquiler','Impuestos / Tributos','Oficina / Materiales','Personal','Salud','Financieros / Bancarios','Otros'];
+function num(v){var n=parseFloat(v);return isNaN(n)?0:n;}
+function isoWeek(dstr){
+  var p=(dstr||'').split('-');if(p.length<3)return{year:0,week:0};
+  var d=new Date(Date.UTC(+p[0],+p[1]-1,+p[2]));var day=d.getUTCDay()||7;d.setUTCDate(d.getUTCDate()+4-day);
+  var yStart=new Date(Date.UTC(d.getUTCFullYear(),0,1));var wk=Math.ceil((((d-yStart)/86400000)+1)/7);
+  return{year:d.getUTCFullYear(),week:wk};
+}
+function semanaKey(dstr){var w=isoWeek(dstr);return w.year?(w.year+'-S'+pad(w.week)):'';}
+function mesKey(dstr){return(dstr||'').slice(0,7);}
+function mesLabel(k){if(!k)return'—';var p=k.split('-');return MESES_LBL[+p[1]-1]+' '+p[0];}
+function esRevertido(x){return((x&&x.estado)||'').toLowerCase().indexOf('revert')>=0;}
+
+function initFinanzas(){fillIngFiltros();fillGastoFiltros();renderIngresos();renderGastos();}
+function showFinSub(sub,btn){
+  document.querySelectorAll('.fin-sub-c').forEach(function(e){e.classList.remove('active');});
+  document.querySelectorAll('#tab-finanzas .sub-tab').forEach(function(e){e.classList.remove('active');});
+  document.getElementById('fin-'+sub).classList.add('active');btn.classList.add('active');
+  if(sub==='ingresos')renderIngresos();
+  if(sub==='gastos')renderGastos();
+}
+
+/* ═══════════════════════ INGRESOS (RHE) ═══════════════════════ */
+function fillIngFiltros(){
+  var years={};DB.ingresos.forEach(function(x){var y=(x.fecha||'').slice(0,4);if(y)years[y]=1;});
+  var sel=document.getElementById('ingFAnio');if(!sel)return;var cv=sel.value;sel.innerHTML='<option value="">Todos los años</option>';
+  Object.keys(years).sort().reverse().forEach(function(y){sel.innerHTML+='<option value="'+y+'">'+y+'</option>';});sel.value=cv;
+}
+function ingFiltradas(){
+  var lista=[].concat(DB.ingresos);
+  var y=document.getElementById('ingFAnio').value,m=document.getElementById('ingFMes').value;
+  var cli=(document.getElementById('ingFCli').value||'').toLowerCase(),est=document.getElementById('ingFEstado').value;
+  var mon=document.getElementById('ingFMoneda').value;
+  if(y)lista=lista.filter(function(x){return(x.fecha||'').slice(0,4)===y;});
+  if(m)lista=lista.filter(function(x){return(x.fecha||'').slice(5,7)===m;});
+  if(cli)lista=lista.filter(function(x){return(x.cliente||'').toLowerCase().indexOf(cli)>=0||(x.ruc||'').indexOf(cli)>=0;});
+  if(est)lista=lista.filter(function(x){return(x.estado||'Emitido')===est;});
+  if(mon)lista=lista.filter(function(x){return(x.moneda||'PEN')===mon;});
+  lista.sort(function(a,b){return(b.fecha||'').localeCompare(a.fecha||'')||(b.numero||'').localeCompare(a.numero||'');});
+  return lista;
+}
+function badgeEstadoIng(e){e=e||'Emitido';var c='b-green';var l=e.toLowerCase();if(l.indexOf('revert')>=0)c='b-red';else if(l.indexOf('pend')>=0)c='b-amber';else if(l.indexOf('pag')>=0)c='b-hora';return'<span class="badge '+c+'">'+esc(e)+'</span>';}
+function renderIngresos(){
+  fillIngFiltros();
+  var lista=ingFiltradas();
+  var tb=document.getElementById('bodyIng');tb.innerHTML='';
+  var pen={b:0,r:0,n:0,c:0},usd={b:0,r:0,n:0,c:0};
+  if(!lista.length){tb.innerHTML='<tr><td colspan="10" class="empty">No hay ingresos. Usa «Importar recibos XML» o «Nuevo ingreso».</td></tr>';}
+  else lista.forEach(function(x){
+    var rev=esRevertido(x);var esUsd=(x.moneda==='USD');
+    if(!rev){var t=esUsd?usd:pen;t.b+=num(x.bruto);t.r+=num(x.retencion);t.n+=num(x.neto);t.c++;}
+    var tr=document.createElement('tr');if(rev)tr.style.opacity='.5';
+    tr.innerHTML='<td class="nowrap"><strong>'+esc(x.numero||'—')+'</strong></td>'+
+      '<td class="nowrap">'+fmtDate(x.fecha)+'</td>'+
+      '<td class="cli">'+esc(x.cliente||'—')+(x.ruc?'<br><span style="font-size:11px;color:var(--muted)">'+esc(x.ruc)+'</span>':'')+'</td>'+
+      '<td class="desc" title="'+esc(x.descripcion||'')+'">'+esc(x.descripcion||'—')+'</td>'+
+      '<td class="num">'+fmtMoneda(x.bruto,x.moneda)+'</td><td class="num">'+fmtMoneda(x.retencion,x.moneda)+'</td><td class="num"><strong>'+fmtMoneda(x.neto,x.moneda)+'</strong></td>'+
+      '<td class="nowrap">'+badgeEstadoIng(x.estado)+'</td>'+
+      '<td class="nowrap"><span class="badge '+(esUsd?'b-amber':'b-hora')+'">'+(esUsd?'US$':'S/')+'</span> <span class="badge '+(x.origen==='rhe'?'b-purple':'b-cat')+'">'+(x.origen==='rhe'?'XML':'Manual')+'</span></td>'+
+      '<td class="nowrap"><div class="acts"><button class="btn btn-amber btn-sm" onclick="openIngreso('+x.id+')">✏</button><button class="btn btn-red btn-sm" onclick="delIngreso('+x.id+')">🗑</button></div></td>';
+    tb.appendChild(tr);
+  });
+  var fr='';
+  if(pen.c)fr+='<tr class="tfoot-row"><td colspan="4"><strong>TOTAL Soles — '+pen.c+' recibo(s)</strong></td><td class="num"><strong>'+fmtMoneda(pen.b,'PEN')+'</strong></td><td class="num"><strong>'+fmtMoneda(pen.r,'PEN')+'</strong></td><td class="num"><strong>'+fmtMoneda(pen.n,'PEN')+'</strong></td><td colspan="3"></td></tr>';
+  if(usd.c)fr+='<tr class="tfoot-row"><td colspan="4"><strong>TOTAL Dólares — '+usd.c+' recibo(s)</strong></td><td class="num"><strong>'+fmtMoneda(usd.b,'USD')+'</strong></td><td class="num"><strong>'+fmtMoneda(usd.r,'USD')+'</strong></td><td class="num"><strong>'+fmtMoneda(usd.n,'USD')+'</strong></td><td colspan="3"></td></tr>';
+  document.getElementById('footIng').innerHTML=fr;
+  var g={PEN:{b:0,n:0},USD:{b:0,n:0}};
+  DB.ingresos.filter(function(x){return !esRevertido(x);}).forEach(function(x){var k=(x.moneda==='USD')?'USD':'PEN';g[k].b+=num(x.bruto);g[k].n+=num(x.neto);});
+  document.getElementById('kpiIngresos').innerHTML=
+    kpi('🧾','Recibos',DB.ingresos.length)+
+    kpi('💵','Neto Soles',fmtMoneda(g.PEN.n,'PEN'))+
+    kpi('💰','Bruto Soles',fmtMoneda(g.PEN.b,'PEN'))+
+    kpi('💵','Neto Dólares',fmtMoneda(g.USD.n,'USD'))+
+    kpi('💰','Bruto Dólares',fmtMoneda(g.USD.b,'USD'));
+  renderIngMeses();
+}
+function renderIngMeses(){
+  var map={};
+  DB.ingresos.forEach(function(x){if(esRevertido(x))return;var k=mesKey(x.fecha);if(!k)return;if(!map[k])map[k]={n:0,penN:0,usdN:0};map[k].n++;if(x.moneda==='USD')map[k].usdN+=num(x.neto);else map[k].penN+=num(x.neto);});
+  var keys=Object.keys(map).sort().reverse();var tb=document.getElementById('bodyIngMes');tb.innerHTML='';
+  if(!keys.length){tb.innerHTML='<tr><td colspan="4" class="empty">Sin datos</td></tr>';return;}
+  keys.forEach(function(k){var d=map[k];var tr=document.createElement('tr');tr.innerHTML='<td><strong>'+mesLabel(k)+'</strong></td><td class="num">'+d.n+'</td><td class="num">'+(d.penN?fmtMoneda(d.penN,'PEN'):'—')+'</td><td class="num">'+(d.usdN?fmtMoneda(d.usdN,'USD'):'—')+'</td>';tb.appendChild(tr);});
+}
+function openIngreso(id){
+  ['ingNumero','ingRuc','ingCliente','ingDesc','ingBruto','ingRet','ingNeto','ingNotas'].forEach(function(f){document.getElementById(f).value='';});
+  document.getElementById('ingFecha').value=today();
+  document.getElementById('ingEstado').value='Emitido';document.getElementById('ingMoneda').value='PEN';
+  document.getElementById('ingId').value='';document.getElementById('titIngreso').textContent='Nuevo Ingreso';
+  if(id){var x=DB.ingresos.find(function(v){return v.id===id;});if(x){
+    document.getElementById('ingNumero').value=x.numero||'';document.getElementById('ingFecha').value=x.fecha||today();
+    document.getElementById('ingRuc').value=x.ruc||'';document.getElementById('ingCliente').value=x.cliente||'';
+    document.getElementById('ingDesc').value=x.descripcion||'';document.getElementById('ingBruto').value=x.bruto||'';
+    document.getElementById('ingRet').value=x.retencion||'';document.getElementById('ingNeto').value=x.neto||'';
+    document.getElementById('ingMoneda').value=x.moneda||'PEN';document.getElementById('ingEstado').value=x.estado||'Emitido';
+    document.getElementById('ingNotas').value=x.notas||'';document.getElementById('ingId').value=x.id;
+    document.getElementById('titIngreso').textContent='Modificar Ingreso';
+  }}
+  openOv('ovIngreso');
+}
+function ingBrutoChg(){var b=num(document.getElementById('ingBruto').value);var r=Math.round(b*0.08*100)/100;document.getElementById('ingRet').value=r.toFixed(2);document.getElementById('ingNeto').value=(b-r).toFixed(2);}
+function ingRetChg(){var b=num(document.getElementById('ingBruto').value);var r=num(document.getElementById('ingRet').value);document.getElementById('ingNeto').value=(b-r).toFixed(2);}
+function saveIngreso(){
+  var fecha=document.getElementById('ingFecha').value;if(!fecha){alert('Ingrese la fecha de emisión.');return;}
+  var bruto=num(document.getElementById('ingBruto').value),neto=num(document.getElementById('ingNeto').value);
+  if(!bruto&&!neto){alert('Ingrese el importe (renta bruta).');return;}
+  var id=parseInt(document.getElementById('ingId').value);
+  var obj={numero:document.getElementById('ingNumero').value.trim(),fecha:fecha,ruc:document.getElementById('ingRuc').value.trim(),cliente:document.getElementById('ingCliente').value.trim(),descripcion:document.getElementById('ingDesc').value.trim(),bruto:bruto,retencion:num(document.getElementById('ingRet').value),neto:neto,moneda:document.getElementById('ingMoneda').value,estado:document.getElementById('ingEstado').value,notas:document.getElementById('ingNotas').value.trim(),origen:'manual'};
+  if(id){var i=DB.ingresos.findIndex(function(v){return v.id===id;});if(i>=0){obj.id=id;obj.origen=DB.ingresos[i].origen||'manual';DB.ingresos[i]=obj;}}else{obj.id=nid(DB.ingresos);DB.ingresos.push(obj);}
+  save();closeOv('ovIngreso');renderIngresos();
+}
+function delIngreso(id){var x=DB.ingresos.find(function(v){return v.id===id;});confirm2('¿Borrar el ingreso "'+((x&&x.numero)||'')+'"?','',function(){DB.ingresos=DB.ingresos.filter(function(v){return v.id!==id;});save();renderIngresos();});}
+function limpFiltIng(){['ingFAnio','ingFMes','ingFCli','ingFMoneda','ingFEstado'].forEach(function(f){document.getElementById(f).value='';});renderIngresos();}
+function exportIngCSV(){
+  var rows=[['Numero','Fecha','RUC','Cliente','Descripcion','Bruto','Retencion','Neto','Moneda','Estado','Origen']];
+  ingFiltradas().forEach(function(x){rows.push([x.numero||'',fmtDate(x.fecha),x.ruc||'',x.cliente||'',x.descripcion||'',x.bruto,x.retencion,x.neto,x.moneda||'PEN',x.estado||'Emitido',x.origen||'manual']);});
+  dlCSV(rows,'ingresos_rhe.csv');
+}
+
+/* ── Parser de Recibos por Honorarios (UBL/XML SUNAT) ── */
+function txt(el){return el&&el.textContent?el.textContent.trim():'';}
+function firstChildLocal(parent,local){if(!parent)return null;for(var i=0;i<parent.children.length;i++){if(parent.children[i].localName===local)return parent.children[i];}return null;}
+function parseRHE(xmlStr,fname){
+  var doc=new DOMParser().parseFromString(xmlStr,'application/xml');
+  if(doc.getElementsByTagName('parsererror').length)return null;
+  var root=doc.documentElement;if(!root||root.localName!=='Invoice')return null;
+  var numero=txt(firstChildLocal(root,'ID'));
+  var fecha=txt(firstChildLocal(root,'IssueDate'));
+  var ruc='',cliente='';
+  var acp=root.getElementsByTagNameNS('*','AccountingCustomerParty')[0];
+  if(acp){ruc=txt(acp.getElementsByTagNameNS('*','CustomerAssignedAccountID')[0]);cliente=txt(acp.getElementsByTagNameNS('*','Name')[0]);}
+  var descripcion=txt(root.getElementsByTagNameNS('*','Description')[0]);
+  var brutoEl=root.getElementsByTagNameNS('*','TaxableAmount')[0];
+  var netoEl=root.getElementsByTagNameNS('*','PayableAmount')[0];
+  var bruto=num(txt(brutoEl)),neto=num(txt(netoEl));
+  var moneda=(netoEl&&netoEl.getAttribute('currencyID'))||(brutoEl&&brutoEl.getAttribute('currencyID'))||'PEN';
+  if(!bruto&&neto)bruto=neto;
+  var retencion=Math.round((bruto-neto)*100)/100;if(retencion<0)retencion=0;
+  var estado=/revert|baja|anul/i.test(fname||'')?'Revertido':'Emitido';
+  if(!numero&&!bruto&&!neto)return null;
+  return{numero:numero,fecha:fecha,ruc:ruc,cliente:cliente,descripcion:descripcion,bruto:bruto,retencion:retencion,neto:neto,moneda:moneda,estado:estado,notas:'Importado de '+(fname||'XML'),origen:'rhe'};
+}
+function importarRHE(input){
+  var files=input.files;if(!files||!files.length)return;
+  var added=0,dup=0,err=0,pending=files.length;
+  var msg=document.getElementById('ingImportMsg');msg.textContent='⏳ Procesando '+files.length+' archivo(s)...';
+  function done(){save();renderIngresos();msg.textContent='✅ Importación: '+added+' nuevo(s), '+dup+' duplicado(s) omitido(s)'+(err?', '+err+' con error/omitido(s)':'')+'.';input.value='';}
+  Array.prototype.forEach.call(files,function(file){
+    var reader=new FileReader();
+    reader.onload=function(e){
+      try{
+        var p=parseRHE(e.target.result,file.name);
+        if(p){
+          var existe=DB.ingresos.some(function(x){return x.numero&&p.numero&&x.numero===p.numero;});
+          if(existe)dup++;else{p.id=nid(DB.ingresos);DB.ingresos.push(p);added++;}
+        }else err++;
+      }catch(ex){err++;}
+      if(--pending===0)done();
+    };
+    reader.onerror=function(){err++;if(--pending===0)done();};
+    reader.readAsText(file);
+  });
+}
+
+/* ═══════════════════════ GASTOS ═══════════════════════ */
+function fillGastoFiltros(){
+  var sc=document.getElementById('gasFCat');if(sc&&sc.options.length<=1){GASTO_CATS.forEach(function(c){sc.innerHTML+='<option value="'+c+'">'+c+'</option>';});}
+  var years={};DB.gastos.forEach(function(x){var y=(x.fecha||'').slice(0,4);if(y)years[y]=1;});
+  var sel=document.getElementById('gasFAnio');var cv=sel.value;sel.innerHTML='<option value="">Todos los años</option>';
+  Object.keys(years).sort().reverse().forEach(function(y){sel.innerHTML+='<option value="'+y+'">'+y+'</option>';});sel.value=cv;
+  var weeks={};DB.gastos.forEach(function(x){var k=semanaKey(x.fecha);if(k)weeks[k]=1;});
+  var sw=document.getElementById('gasFSem');var cw=sw.value;sw.innerHTML='<option value="">Todas las semanas</option>';
+  Object.keys(weeks).sort().reverse().forEach(function(k){sw.innerHTML+='<option value="'+k+'">'+k.replace('-S',' · Semana ')+'</option>';});sw.value=cw;
+}
+function gasFiltrados(){
+  var lista=[].concat(DB.gastos);
+  var y=document.getElementById('gasFAnio').value,m=document.getElementById('gasFMes').value;
+  var sem=document.getElementById('gasFSem').value,cat=document.getElementById('gasFCat').value;
+  if(y)lista=lista.filter(function(x){return(x.fecha||'').slice(0,4)===y;});
+  if(m)lista=lista.filter(function(x){return(x.fecha||'').slice(5,7)===m;});
+  if(sem)lista=lista.filter(function(x){return semanaKey(x.fecha)===sem;});
+  if(cat)lista=lista.filter(function(x){return x.categoria===cat;});
+  lista.sort(function(a,b){return(b.fecha||'').localeCompare(a.fecha||'');});
+  return lista;
+}
+function renderGastos(){
+  fillGastoFiltros();
+  var lista=gasFiltrados();var tb=document.getElementById('bodyGas');tb.innerHTML='';var tot=0;
+  if(!lista.length){tb.innerHTML='<tr><td colspan="7" class="empty">No hay gastos. Usa «Nuevo gasto».</td></tr>';}
+  else lista.forEach(function(x){
+    tot+=num(x.monto);var w=isoWeek(x.fecha);
+    var tr=document.createElement('tr');
+    tr.innerHTML='<td>'+fmtDate(x.fecha)+'</td><td>'+mesLabel(mesKey(x.fecha))+'</td><td>'+(w.week?'Semana '+w.week:'—')+'</td>'+
+      '<td><span class="badge b-cat">'+esc(x.categoria||'Otros')+'</span></td>'+
+      '<td style="max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(x.descripcion||'—')+'</td>'+
+      '<td>'+fmtS(x.monto)+'</td>'+
+      '<td><div class="acts"><button class="btn btn-amber btn-sm" onclick="openGasto('+x.id+')">✏</button><button class="btn btn-red btn-sm" onclick="delGasto('+x.id+')">🗑</button></div></td>';
+    tb.appendChild(tr);
+  });
+  document.getElementById('footGas').innerHTML=lista.length?'<tr class="tfoot-row"><td colspan="5"><strong>TOTAL</strong></td><td><strong>'+fmtS(tot)+'</strong></td><td></td></tr>':'';
+  var gTot=DB.gastos.reduce(function(s,x){return s+num(x.monto);},0);
+  var mesA=today().slice(0,7),semA=semanaKey(today());
+  var gMes=DB.gastos.filter(function(x){return mesKey(x.fecha)===mesA;}).reduce(function(s,x){return s+num(x.monto);},0);
+  var gSem=DB.gastos.filter(function(x){return semanaKey(x.fecha)===semA;}).reduce(function(s,x){return s+num(x.monto);},0);
+  document.getElementById('kpiGastos').innerHTML=
+    kpi('📤','Gastos totales',fmtS(gTot))+kpi('📅','Gasto mes actual',fmtS(gMes))+
+    kpi('🗓','Gasto semana actual',fmtS(gSem))+kpi('🧮','Registros',DB.gastos.length);
+  renderGasMeses();renderGasSemanas();
+}
+function renderGasMeses(){
+  var map={};DB.gastos.forEach(function(x){var k=mesKey(x.fecha);if(!k)return;if(!map[k])map[k]={n:0,m:0};map[k].n++;map[k].m+=num(x.monto);});
+  var keys=Object.keys(map).sort().reverse();var tb=document.getElementById('bodyGasMes');tb.innerHTML='';
+  if(!keys.length){tb.innerHTML='<tr><td colspan="3" class="empty">Sin datos</td></tr>';return;}
+  keys.forEach(function(k){var tr=document.createElement('tr');tr.innerHTML='<td><strong>'+mesLabel(k)+'</strong></td><td>'+map[k].n+'</td><td><strong>'+fmtS(map[k].m)+'</strong></td>';tb.appendChild(tr);});
+}
+function renderGasSemanas(){
+  var map={};DB.gastos.forEach(function(x){var k=semanaKey(x.fecha);if(!k)return;if(!map[k])map[k]={n:0,m:0};map[k].n++;map[k].m+=num(x.monto);});
+  var keys=Object.keys(map).sort().reverse();var tb=document.getElementById('bodyGasSem');tb.innerHTML='';
+  if(!keys.length){tb.innerHTML='<tr><td colspan="3" class="empty">Sin datos</td></tr>';return;}
+  keys.forEach(function(k){var tr=document.createElement('tr');tr.innerHTML='<td><strong>'+k.replace('-S',' · Semana ')+'</strong></td><td>'+map[k].n+'</td><td><strong>'+fmtS(map[k].m)+'</strong></td>';tb.appendChild(tr);});
+}
+function openGasto(id){
+  var sc=document.getElementById('gasCat');if(sc.options.length===0){GASTO_CATS.forEach(function(c){sc.innerHTML+='<option value="'+c+'">'+c+'</option>';});}
+  document.getElementById('gasFecha').value=today();document.getElementById('gasDesc').value='';document.getElementById('gasMonto').value='';document.getElementById('gasNotas').value='';
+  sc.value=GASTO_CATS[0];document.getElementById('gasId').value='';document.getElementById('titGasto').textContent='Nuevo Gasto';
+  if(id){var x=DB.gastos.find(function(v){return v.id===id;});if(x){document.getElementById('gasFecha').value=x.fecha||today();document.getElementById('gasCat').value=x.categoria||GASTO_CATS[0];document.getElementById('gasDesc').value=x.descripcion||'';document.getElementById('gasMonto').value=x.monto||'';document.getElementById('gasNotas').value=x.notas||'';document.getElementById('gasId').value=x.id;document.getElementById('titGasto').textContent='Modificar Gasto';}}
+  openOv('ovGasto');
+}
+function saveGasto(){
+  var fecha=document.getElementById('gasFecha').value;if(!fecha){alert('Ingrese la fecha.');return;}
+  var monto=num(document.getElementById('gasMonto').value);if(!monto){alert('Ingrese el monto.');return;}
+  var id=parseInt(document.getElementById('gasId').value);
+  var obj={fecha:fecha,categoria:document.getElementById('gasCat').value,descripcion:document.getElementById('gasDesc').value.trim(),monto:monto,notas:document.getElementById('gasNotas').value.trim()};
+  if(id){var i=DB.gastos.findIndex(function(v){return v.id===id;});if(i>=0){obj.id=id;DB.gastos[i]=obj;}}else{obj.id=nid(DB.gastos);DB.gastos.push(obj);}
+  save();closeOv('ovGasto');renderGastos();
+}
+function delGasto(id){confirm2('¿Borrar este gasto?','',function(){DB.gastos=DB.gastos.filter(function(v){return v.id!==id;});save();renderGastos();});}
+function limpFiltGas(){['gasFAnio','gasFMes','gasFSem','gasFCat'].forEach(function(f){document.getElementById(f).value='';});renderGastos();}
+function exportGasCSV(){
+  var rows=[['Fecha','Mes','Semana','Categoria','Descripcion','Monto']];
+  gasFiltrados().forEach(function(x){var w=isoWeek(x.fecha);rows.push([fmtDate(x.fecha),mesLabel(mesKey(x.fecha)),w.week?'Semana '+w.week:'',x.categoria||'',x.descripcion||'',x.monto]);});
+  dlCSV(rows,'gastos.csv');
+}
+
+/* ═══════════════════════ NUBE (SUPABASE) ═══════════════════════ */
+var CLOUD_KEYS=['abogados','tarifas','actividades','registros','clientes','proyectos','ingresos','gastos','liquidaciones'];
+function normalizaDB(d){d=d||{};CLOUD_KEYS.forEach(function(k){if(!Array.isArray(d[k]))d[k]=[];});return d;}
+function initCloud(){
+  if(!window.supabase||!window.supabase.createClient){
+    document.getElementById('loginMsg').innerHTML='⚠ No se pudo cargar la librería (¿sin conexión a internet?).';
+    return;
+  }
+  supa=window.supabase.createClient(SUPA_URL,SUPA_KEY);
+  supa.auth.getSession().then(function(res){
+    if(res.data&&res.data.session){onLogin(res.data.session.user);}
+    else{document.getElementById('loginMsg').textContent='Ingrese sus credenciales.';}
+  });
+}
+function doLogin(){
+  var email=(document.getElementById('loginEmail').value||'').trim();
+  var pass=document.getElementById('loginPass').value||'';
+  var msg=document.getElementById('loginMsg');
+  if(!email||!pass){msg.textContent='Ingrese correo y contraseña.';return;}
+  document.getElementById('btnLogin').disabled=true;msg.style.color='var(--muted)';msg.textContent='Ingresando...';
+  supa.auth.signInWithPassword({email:email,password:pass}).then(function(res){
+    document.getElementById('btnLogin').disabled=false;
+    if(res.error){msg.style.color='var(--red)';msg.textContent='❌ '+(res.error.message==='Invalid login credentials'?'Correo o contraseña incorrectos.':res.error.message);return;}
+    onLogin(res.data.user);
+  });
+}
+function onLogin(user){
+  cloudUser=user;
+  document.getElementById('ovLogin').classList.remove('open');
+  var ub=document.getElementById('userBox');ub.textContent='👤 '+user.email;ub.style.display='';
+  document.getElementById('btnLogout').style.display='';
+  aplicarPermisos();
+  loadCloud();
+  subscribeRealtime();
+  if(user.user_metadata&&user.user_metadata.mustChange&&(user.email||'').toLowerCase()!==ADMIN_EMAIL){forzarCambioClave();}
+}
+function doLogout(){if(supa){supa.auth.signOut().then(function(){location.reload();});}else{location.reload();}}
+function loadCloud(){
+  cloudReady=false;
+  var el=document.getElementById('backupInfo');if(el){el.innerHTML='☁ Cargando...';el.style.color='#fde68a';}
+  supa.from('estudio_data').select('data').eq('id','main').maybeSingle().then(function(res){
+    if(res.error){if(el){el.innerHTML='⚠ '+res.error.message;el.style.color='#fca5a5';}}
+    DB=normalizaDB(res.data?res.data.data:{});
+    var needSeed=(DB._seedVer!==2 && DB.ingresos.length===0);
+    cloudReady=true;
+    if(needSeed){DB.ingresos=SEED_INGRESOS;DB._seeded=true;DB._seedVer=2;pushCloud();}
+    reRenderActive();
+  });
+}
+function pushCloud(){
+  if(!supa||!cloudUser)return;
+  var el=document.getElementById('backupInfo');
+  supa.from('estudio_data').upsert({id:'main',data:DB,updated_at:new Date().toISOString(),updated_by:cloudUser.email}).then(function(res){
+    if(!el)return;
+    if(res.error){el.innerHTML='⚠ Error al guardar en la nube';el.style.color='#fca5a5';}
+    else{el.innerHTML='☁ Guardado en la nube';el.style.color='#a7f3d0';}
+  });
+}
+function subscribeRealtime(){
+  if(realtimeChan||!supa)return;
+  realtimeChan=supa.channel('estudio_main')
+    .on('postgres_changes',{event:'UPDATE',schema:'public',table:'estudio_data',filter:'id=eq.main'},function(payload){
+      if(!payload.new)return;
+      if(cloudUser&&payload.new.updated_by===cloudUser.email)return; /* fue mi propio cambio */
+      applyingRemote=true;
+      DB=normalizaDB(payload.new.data);
+      try{localStorage.setItem(STORE,JSON.stringify(DB));}catch(e){}
+      reRenderActive();
+      var el=document.getElementById('backupInfo');if(el){el.innerHTML='🔄 Actualizado por '+(payload.new.updated_by||'otro usuario');el.style.color='#a7f3d0';}
+      applyingRemote=false;
+    }).subscribe();
+}
+function reRenderActive(){
+  renderResumen();
+  var tab=(document.querySelector('.tab-content.active')||{}).id||'';
+  if(tab==='tab-finanzas')initFinanzas();
+  else if(tab==='tab-reportes')renderRep();
+  else if(tab==='tab-cronometro')fillCronSelects();
+  else if(tab==='tab-registro'){
+    var sub=(document.querySelector('.sub-c.active')||{}).id||'';
+    if(sub==='sub-reg-abogados')renderAb();
+    else if(sub==='sub-reg-actividades')renderAct();
+    else if(sub==='sub-reg-tarifas')renderTar();
+    else if(sub==='sub-reg-clientes')renderClientes();
+    else if(sub==='sub-reg-proyectos'){fillFiltCliProy();renderProyectos();}
+    else if(sub==='sub-reg-tiempo'){fillRegSelects();renderRegs();}
+  }
+}
+
+/* ═══════════════════════ USUARIOS Y PERFILES ═══════════════════════ */
+var ADMIN_EMAIL='martin.montoya@gmail.com';
+var PERMISOS={
+  'Administrador':['registro','resumen','reportes','cronometro','finanzas','liquidacion','usuarios'],
+  'Administrativo':['registro','resumen','reportes','cronometro','finanzas','liquidacion'],
+  'Abogado':['registro','resumen','reportes','cronometro','liquidacion'],
+  'Abogado Externo':['registro','resumen','cronometro']
+};
+function miRol(){
+  if(!cloudUser)return null;
+  if((cloudUser.email||'').toLowerCase()===ADMIN_EMAIL)return 'Administrador';
+  return (cloudUser.user_metadata&&cloudUser.user_metadata.role)||'Abogado';
+}
+function aplicarPermisos(){
+  var permitidos=PERMISOS[miRol()]||PERMISOS['Abogado'];
+  document.querySelectorAll('.nav-btn[data-tab]').forEach(function(b){
+    b.style.display=permitidos.indexOf(b.getAttribute('data-tab'))>=0?'':'none';
+  });
+  var act=document.querySelector('.tab-content.active');
+  var actTab=act?act.id.replace('tab-',''):'';
+  if(actTab&&permitidos.indexOf(actTab)<0){var btn=document.querySelector('.nav-btn[data-tab="resumen"]');if(btn)btn.click();}
+}
+function invokeAdmin(payload){
+  if(!supa)return Promise.resolve({error:{message:'Sin conexión'}});
+  return supa.functions.invoke('admin-users',{body:payload});
+}
+function msgUsu(res,ok){
+  var el=document.getElementById('usuMsg');if(!el)return;
+  if(res.error){el.style.color='#dc2626';el.textContent='❌ '+(res.error.message||res.error);}
+  else if(res.data&&res.data.error){el.style.color='#dc2626';el.textContent='❌ '+res.data.error;}
+  else{el.style.color='#16a34a';el.textContent='✅ '+(ok||'Hecho');}
+}
+function initUsuarios(){renderUsuarios();}
+function renderUsuarios(){
+  var tb=document.getElementById('bodyUsu');if(!tb)return;
+  tb.innerHTML='<tr><td colspan="6" class="empty">Cargando usuarios...</td></tr>';
+  invokeAdmin({action:'list'}).then(function(res){
+    if(res.error){tb.innerHTML='<tr><td colspan="6" class="empty">No se pudo listar. ¿Desplegaste la función <b>admin-users</b> en Supabase? ('+esc(res.error.message||res.error)+')</td></tr>';return;}
+    if(res.data&&res.data.error){tb.innerHTML='<tr><td colspan="6" class="empty">'+esc(res.data.error)+'</td></tr>';return;}
+    var users=(res.data&&res.data.users)||[];
+    if(!users.length){tb.innerHTML='<tr><td colspan="6" class="empty">No hay usuarios.</td></tr>';return;}
+    tb.innerHTML='';
+    users.forEach(function(u){
+      var tr=document.createElement('tr');
+      tr.innerHTML='<td><strong>'+esc(u.email)+'</strong></td><td>'+esc(u.nombre||'—')+'</td>'+
+        '<td><span class="badge b-cat">'+esc(u.role||'—')+'</span></td>'+
+        '<td style="font-size:12px">'+(u.confirmed?'<span class="habido">Activo</span>':'<span class="no-habido">Sin confirmar</span>')+(u.mustChange?' · <span style="color:var(--amber);font-weight:700">clave temporal</span>':'')+'</td>'+
+        '<td class="nowrap" style="font-size:12px">'+(u.lastSignIn?esc(String(u.lastSignIn).slice(0,10)):'—')+'</td>'+
+        '<td class="nowrap"><div style="display:flex;gap:5px;flex-wrap:nowrap"><button class="btn btn-amber btn-sm" onclick="cambiarRol(\''+u.id+'\')">Perfil</button><button class="btn btn-out btn-sm" onclick="resetClave(\''+u.id+'\')">Clave</button><button class="btn btn-red btn-sm" onclick="delUsuario(\''+u.id+'\',\''+esc(u.email)+'\')">🗑</button></div></td>';
+      tb.appendChild(tr);
+    });
+  });
+}
+function genClave(){document.getElementById('usuClave').value='Ci'+Math.random().toString(36).slice(2,7)+Math.floor(Math.random()*9000+1000);}
+function openUsuario(){
+  document.getElementById('usuEmail').value='';document.getElementById('usuNombre').value='';
+  document.getElementById('usuRol').value='Abogado';document.getElementById('usuClave').value='';
+  document.getElementById('btnSaveUsu').disabled=false;
+  openOv('ovUsuario');
+}
+function saveUsuario(){
+  var email=document.getElementById('usuEmail').value.trim();
+  var clave=document.getElementById('usuClave').value;
+  if(!email){alert('Ingrese el correo.');return;}
+  if(!clave||clave.length<6){alert('La clave temporal debe tener al menos 6 caracteres.');return;}
+  var btn=document.getElementById('btnSaveUsu');btn.disabled=true;
+  invokeAdmin({action:'create',email:email,password:clave,nombre:document.getElementById('usuNombre').value.trim(),role:document.getElementById('usuRol').value}).then(function(res){
+    btn.disabled=false;
+    if(res.error||(res.data&&res.data.error)){alert('❌ '+((res.error&&(res.error.message||res.error))||res.data.error));return;}
+    closeOv('ovUsuario');msgUsu({data:{}},'Usuario creado. Clave temporal: '+clave);renderUsuarios();
+  });
+}
+function cambiarRol(id){
+  var r=prompt('Perfil del usuario:\nAdministrador / Administrativo / Abogado / Abogado Externo');
+  if(!r)return;
+  invokeAdmin({action:'setRole',id:id,role:r.trim()}).then(function(res){msgUsu(res,'Perfil actualizado.');renderUsuarios();});
+}
+function resetClave(id){
+  var p=prompt('Nueva clave temporal (mín. 6 caracteres). El usuario deberá cambiarla al ingresar:');
+  if(!p)return;
+  invokeAdmin({action:'resetPassword',id:id,password:p}).then(function(res){msgUsu(res,'Clave restablecida.');renderUsuarios();});
+}
+function delUsuario(id,email){
+  confirm2('¿Eliminar al usuario "'+email+'"?','Perderá el acceso al sistema.',function(){
+    invokeAdmin({action:'delete',id:id,email:email}).then(function(res){msgUsu(res,'Usuario eliminado.');renderUsuarios();});
+  });
+}
+function forzarCambioClave(){document.getElementById('ovCambioClave').classList.add('open');}
+function doCambioClave(){
+  var n=document.getElementById('ccNueva').value,r=document.getElementById('ccRepetir').value;
+  var msg=document.getElementById('ccMsg');
+  if(!n||n.length<6){msg.style.color='#dc2626';msg.textContent='Mínimo 6 caracteres.';return;}
+  if(n!==r){msg.style.color='#dc2626';msg.textContent='Las contraseñas no coinciden.';return;}
+  msg.style.color='var(--muted)';msg.textContent='Guardando...';
+  supa.auth.updateUser({password:n,data:{mustChange:false}}).then(function(res){
+    if(res.error){msg.style.color='#dc2626';msg.textContent='❌ '+res.error.message;return;}
+    if(cloudUser){cloudUser.user_metadata=cloudUser.user_metadata||{};cloudUser.user_metadata.mustChange=false;}
+    document.getElementById('ovCambioClave').classList.remove('open');
+  });
+}
+
+/* ═══════════════════════ UTILS ═══════════════════════ */
+function kpi(icon,lbl,val){return'<div class="kpi"><div class="kpi-icon">'+icon+'</div><div class="kpi-val">'+val+'</div><div class="kpi-lbl">'+lbl+'</div></div>';}
+function csvCell(v){var s=String(v==null?'':v);if(/[",\n\r;]/.test(s)){s='"'+s.replace(/"/g,'""')+'"';}return s;}
+function dlCSV(rows,fn){
+  var b=new Blob(['﻿'+rows.map(function(r){return r.map(csvCell).join(',');}).join('\r\n')],{type:'text/csv;charset=utf-8;'});
+  var a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=fn;a.click();
+  setTimeout(function(){URL.revokeObjectURL(a.href);},1000);
+}
+
+/* ═══════════════════════ INICIO ═══════════════════════ */
+document.addEventListener('DOMContentLoaded',function(){
+  document.getElementById('crFecha').value=today();
+  document.getElementById('rFecha').value=today();
+  initCloud();
+});
+</script>
+</body>
+</html>
+
+
+
