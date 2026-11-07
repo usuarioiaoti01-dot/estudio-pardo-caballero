@@ -490,6 +490,11 @@ details.legacy summary{cursor:pointer;font-weight:700;color:var(--navy);}
     <div class="hint">La v.02 guarda sus datos aparte (registro <code>v2</code>), para no afectar la versión publicada. La primera vez que se abrió, copió y convirtió los datos de la versión anterior (registro <code>main</code>). Si después se siguieron cargando datos en la versión anterior, puedes volver a copiarlos. <strong>Ojo:</strong> esto reemplaza todo lo registrado en la v.02.</div>
     <button class="btn btn-out" onclick="remigrarDesdeV1()">🔄 Volver a copiar datos desde la versión anterior</button>
   </div>
+  <div class="card">
+    <div class="ch"><span class="ct">🧹 Reiniciar datos</span></div>
+    <div class="hint">Borra <strong>todos los datos</strong> de la aplicación (abogados, clientes, horas, recibos, gastos y liquidaciones) para <strong>empezar de cero</strong>. <strong>No afecta a los usuarios de acceso.</strong> Esta acción no se puede deshacer; si quieres conservar algo, exporta antes una copia.</div>
+    <button class="btn btn-red" onclick="reiniciarDatos()">🧹 Reiniciar datos (empezar de cero)</button>
+  </div>
 </div>
 
 </div><!-- /main -->
@@ -1626,6 +1631,11 @@ function remigrarDesdeV1(){
       DB=migrarV1(r1.data?r1.data.data:{});save();pushCloud();reRenderActive();alert('✅ Datos copiados y convertidos.');
     });
   },'🔄 Reemplazar');
+}
+function reiniciarDatos(){
+  confirm2('¿Reiniciar la aplicación y empezar de cero?','Se BORRARÁN todos los datos de la v.02 (abogados, clientes, horas, recibos, gastos, liquidaciones). Los usuarios de acceso NO se tocan. Esta acción no se puede deshacer.',function(){
+    DB=dbVacia();save();pushCloud();reRenderActive();alert('✅ Datos reiniciados. La aplicación quedó en blanco.');
+  },'🗑 Reiniciar');
 }
 function pushCloud(){
   if(!supa||!cloudUser)return;
