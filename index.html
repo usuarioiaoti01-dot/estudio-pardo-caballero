@@ -358,7 +358,7 @@ details.legacy summary{cursor:pointer;font-weight:700;color:var(--navy);}
 <div id="tab-finanzas" class="tab-content">
   <div class="sub-tabs">
     <button class="sub-tab active" onclick="showFinSub('ingresos',this)">📥 Ingresos (RHE)</button>
-    <button class="sub-tab" onclick="showFinSub('gastos',this)">📤 Gastos</button>
+    <button class="sub-tab" onclick="showFinSub('gastos',this)">📤 Egresos</button>
   </div>
 
   <!-- SUB INGRESOS -->
@@ -421,10 +421,14 @@ details.legacy summary{cursor:pointer;font-weight:700;color:var(--navy);}
 
   <!-- SUB GASTOS -->
   <div id="fin-gastos" class="fin-sub-c">
+    <div class="sub-tabs" style="margin-bottom:14px">
+      <button class="sub-tab active" id="egTabEstudio" onclick="setGastoTipo('estudio',this)">🏢 Egresos Estudio</button>
+      <button class="sub-tab" id="egTabPersonal" onclick="setGastoTipo('personal',this)">👤 Egresos Personales</button>
+    </div>
     <div class="kpi-grid" id="kpiGastos"></div>
     <div class="card">
       <div class="ch">
-        <span class="ct">📤 Registro de Gastos</span>
+        <span class="ct" id="gasTitulo">🏢 Egresos del Estudio</span>
         <div style="display:flex;gap:6px;flex-wrap:wrap">
           <button class="btn btn-navy" onclick="openGasto()">+ Nuevo gasto</button>
           <button class="btn btn-green btn-sm" onclick="exportGasCSV()">⬇ CSV</button>
@@ -612,6 +616,7 @@ details.legacy summary{cursor:pointer;font-weight:700;color:var(--navy);}
     <div class="mh"><span class="mt" id="titGasto">Nuevo Gasto</span><button class="x-btn" onclick="closeOv('ovGasto')">✕</button></div>
     <div class="fg">
       <div class="fgroup"><label>Fecha *</label><input type="date" id="gasFecha"></div>
+      <div class="fgroup"><label>Tipo de egreso *</label><select id="gasTipo"><option value="estudio">🏢 Estudio</option><option value="personal">👤 Personal</option></select></div>
       <div class="fgroup"><label>Categoría *</label><select id="gasCat"></select></div>
       <div class="fgroup"><label>Monto (S/) *</label><input type="number" id="gasMonto" min="0" step="0.01" placeholder="0.00"></div>
       <div class="fgroup ff"><label>Descripción</label><textarea id="gasDesc" rows="2" placeholder="Detalle del gasto..."></textarea></div>
@@ -1820,7 +1825,15 @@ function importarRHE(input){
   });
 }
 
-/* ═══════════════════════ GASTOS ═══════════════════════ */
+/* ═══════════════════════ GASTOS / EGRESOS ═══════════════════════ */
+var gastoTipo='estudio';
+function setGastoTipo(t){
+  gastoTipo=t;
+  document.getElementById('egTabEstudio').classList.toggle('active',t==='estudio');
+  document.getElementById('egTabPersonal').classList.toggle('active',t==='personal');
+  var tt=document.getElementById('gasTitulo');if(tt)tt.textContent=(t==='estudio'?'🏢 Egresos del Estudio':'👤 Egresos Personales');
+  renderGastos();
+}
 function fillGastoFiltros(){
   var sc=document.getElementById('gasFCat');if(sc&&sc.options.length<=1){GASTO_CATS.forEach(function(c){sc.innerHTML+='<option value="'+c+'">'+c+'</option>';});}
   var years={};DB.gastos.forEach(function(x){var y=(x.fecha||'').slice(0,4);if(y)years[y]=1;});
@@ -1832,6 +1845,7 @@ function fillGastoFiltros(){
 }
 function gasFiltrados(){
   var lista=[].concat(DB.gastos);
+  lista=lista.filter(function(x){return (x.tipo||'estudio')===gastoTipo;});
   var y=document.getElementById('gasFAnio').value,m=document.getElementById('gasFMes').value;
   var sem=document.getElementById('gasFSem').value,cat=document.getElementById('gasFCat').value;
   if(y)lista=lista.filter(function(x){return(x.fecha||'').slice(0,4)===y;});
@@ -1856,23 +1870,25 @@ function renderGastos(){
     tb.appendChild(tr);
   });
   document.getElementById('footGas').innerHTML=lista.length?'<tr class="tfoot-row"><td colspan="5"><strong>TOTAL</strong></td><td><strong>'+fmtS(tot)+'</strong></td><td></td></tr>':'';
-  var gTot=DB.gastos.reduce(function(s,x){return s+num(x.monto);},0);
+  var base=DB.gastos.filter(function(x){return (x.tipo||'estudio')===gastoTipo;});
+  var gTot=base.reduce(function(s,x){return s+num(x.monto);},0);
   var mesA=today().slice(0,7),semA=semanaKey(today());
-  var gMes=DB.gastos.filter(function(x){return mesKey(x.fecha)===mesA;}).reduce(function(s,x){return s+num(x.monto);},0);
-  var gSem=DB.gastos.filter(function(x){return semanaKey(x.fecha)===semA;}).reduce(function(s,x){return s+num(x.monto);},0);
+  var gMes=base.filter(function(x){return mesKey(x.fecha)===mesA;}).reduce(function(s,x){return s+num(x.monto);},0);
+  var gSem=base.filter(function(x){return semanaKey(x.fecha)===semA;}).reduce(function(s,x){return s+num(x.monto);},0);
+  var etq=(gastoTipo==='estudio'?'Estudio':'Personales');
   document.getElementById('kpiGastos').innerHTML=
-    kpi('📤','Gastos totales',fmtS(gTot))+kpi('📅','Gasto mes actual',fmtS(gMes))+
-    kpi('🗓','Gasto semana actual',fmtS(gSem))+kpi('🧮','Registros',DB.gastos.length);
+    kpi('📤','Egresos '+etq,fmtS(gTot))+kpi('📅','Mes actual',fmtS(gMes))+
+    kpi('🗓','Semana actual',fmtS(gSem))+kpi('🧮','Registros',base.length);
   renderGasMeses();renderGasSemanas();
 }
 function renderGasMeses(){
-  var map={};DB.gastos.forEach(function(x){var k=mesKey(x.fecha);if(!k)return;if(!map[k])map[k]={n:0,m:0};map[k].n++;map[k].m+=num(x.monto);});
+  var map={};DB.gastos.filter(function(x){return (x.tipo||'estudio')===gastoTipo;}).forEach(function(x){var k=mesKey(x.fecha);if(!k)return;if(!map[k])map[k]={n:0,m:0};map[k].n++;map[k].m+=num(x.monto);});
   var keys=Object.keys(map).sort().reverse();var tb=document.getElementById('bodyGasMes');tb.innerHTML='';
   if(!keys.length){tb.innerHTML='<tr><td colspan="3" class="empty">Sin datos</td></tr>';return;}
   keys.forEach(function(k){var tr=document.createElement('tr');tr.innerHTML='<td><strong>'+mesLabel(k)+'</strong></td><td>'+map[k].n+'</td><td><strong>'+fmtS(map[k].m)+'</strong></td>';tb.appendChild(tr);});
 }
 function renderGasSemanas(){
-  var map={};DB.gastos.forEach(function(x){var k=semanaKey(x.fecha);if(!k)return;if(!map[k])map[k]={n:0,m:0};map[k].n++;map[k].m+=num(x.monto);});
+  var map={};DB.gastos.filter(function(x){return (x.tipo||'estudio')===gastoTipo;}).forEach(function(x){var k=semanaKey(x.fecha);if(!k)return;if(!map[k])map[k]={n:0,m:0};map[k].n++;map[k].m+=num(x.monto);});
   var keys=Object.keys(map).sort().reverse();var tb=document.getElementById('bodyGasSem');tb.innerHTML='';
   if(!keys.length){tb.innerHTML='<tr><td colspan="3" class="empty">Sin datos</td></tr>';return;}
   keys.forEach(function(k){var tr=document.createElement('tr');tr.innerHTML='<td><strong>'+k.replace('-S',' · Semana ')+'</strong></td><td>'+map[k].n+'</td><td><strong>'+fmtS(map[k].m)+'</strong></td>';tb.appendChild(tr);});
@@ -1880,15 +1896,15 @@ function renderGasSemanas(){
 function openGasto(id){
   var sc=document.getElementById('gasCat');if(sc.options.length===0){GASTO_CATS.forEach(function(c){sc.innerHTML+='<option value="'+c+'">'+c+'</option>';});}
   document.getElementById('gasFecha').value=today();document.getElementById('gasDesc').value='';document.getElementById('gasMonto').value='';document.getElementById('gasNotas').value='';
-  sc.value=GASTO_CATS[0];document.getElementById('gasId').value='';document.getElementById('titGasto').textContent='Nuevo Gasto';
-  if(id){var x=DB.gastos.find(function(v){return v.id===id;});if(x){document.getElementById('gasFecha').value=x.fecha||today();document.getElementById('gasCat').value=x.categoria||GASTO_CATS[0];document.getElementById('gasDesc').value=x.descripcion||'';document.getElementById('gasMonto').value=x.monto||'';document.getElementById('gasNotas').value=x.notas||'';document.getElementById('gasId').value=x.id;document.getElementById('titGasto').textContent='Modificar Gasto';}}
+  sc.value=GASTO_CATS[0];document.getElementById('gasTipo').value=gastoTipo;document.getElementById('gasId').value='';document.getElementById('titGasto').textContent='Nuevo Egreso';
+  if(id){var x=DB.gastos.find(function(v){return v.id===id;});if(x){document.getElementById('gasFecha').value=x.fecha||today();document.getElementById('gasTipo').value=x.tipo||'estudio';document.getElementById('gasCat').value=x.categoria||GASTO_CATS[0];document.getElementById('gasDesc').value=x.descripcion||'';document.getElementById('gasMonto').value=x.monto||'';document.getElementById('gasNotas').value=x.notas||'';document.getElementById('gasId').value=x.id;document.getElementById('titGasto').textContent='Modificar Egreso';}}
   openOv('ovGasto');
 }
 function saveGasto(){
   var fecha=document.getElementById('gasFecha').value;if(!fecha){alert('Ingrese la fecha.');return;}
   var monto=num(document.getElementById('gasMonto').value);if(!monto){alert('Ingrese el monto.');return;}
   var id=parseInt(document.getElementById('gasId').value);
-  var obj={fecha:fecha,categoria:document.getElementById('gasCat').value,descripcion:document.getElementById('gasDesc').value.trim(),monto:monto,notas:document.getElementById('gasNotas').value.trim()};
+  var obj={fecha:fecha,tipo:document.getElementById('gasTipo').value,categoria:document.getElementById('gasCat').value,descripcion:document.getElementById('gasDesc').value.trim(),monto:monto,notas:document.getElementById('gasNotas').value.trim()};
   if(id){var i=DB.gastos.findIndex(function(v){return v.id===id;});if(i>=0){obj.id=id;DB.gastos[i]=obj;}}else{obj.id=nid(DB.gastos);DB.gastos.push(obj);}
   save();closeOv('ovGasto');renderGastos();
 }
