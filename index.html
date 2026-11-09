@@ -1485,7 +1485,7 @@ function htmlTablaLiquidacion(liq){
     /* La tarifa NO incluye el 8%: el recibo se emite por el bruto y no se muestra la retención */
     h+='<div class="tot-box">'+
       '<div><span>Honorarios por horas</span><span>'+fmtMoneda(liq.honorarios,mon)+'</span></div>'+
-      '<div><span>Monto del recibo por honorarios</span><span>'+fmtMoneda(liq.bruto,mon)+'</span></div>'+
+      '<div><span>Monto por Honorarios</span><span>'+fmtMoneda(liq.bruto,mon)+'</span></div>'+
       '<div><span>Retención 8%</span><span>− '+fmtMoneda(liq.retencion,mon)+'</span></div>'+
       '<div class="big"><span>Monto a pagar</span><span>'+fmtMoneda(liq.neto,mon)+'</span></div></div>';
   }else{
@@ -1612,7 +1612,7 @@ function imprimirLiquidacion(L){
     '<tfoot><tr><td>TOTAL</td><td class="r">'+fmtNum(L.totalHoras)+'</td><td></td><td class="r">'+fmtMoneda(L.honorarios,mon)+'</td></tr></tfoot></table>'+
     '<div class="tot">'+(L.tarifaNeta?
       '<div><span>Honorarios por horas</span><span>'+fmtMoneda(L.honorarios,mon)+'</span></div>'+
-      '<div><span>Monto del recibo por honorarios</span><span>'+fmtMoneda(L.bruto,mon)+'</span></div>'+
+      '<div><span>Monto por Honorarios</span><span>'+fmtMoneda(L.bruto,mon)+'</span></div>'+
       '<div><span>Retención 8%</span><span>− '+fmtMoneda(L.retencion,mon)+'</span></div>'+
       '<div class="big"><span>Monto a pagar</span><span>'+fmtMoneda(L.neto,mon)+'</span></div>'
       :
