@@ -219,7 +219,7 @@ details.legacy summary{cursor:pointer;font-weight:700;color:var(--navy);}
 
 <!-- ══════════════ INICIO ══════════════ -->
 <div id="tab-inicio" class="tab-content active">
-  <div class="card">
+  <div class="card" id="iniGuiaCard">
     <div class="ch">
       <span class="ct">🧭 ¿Cómo funciona? Cuatro pasos</span>
       <div class="fgroup" style="flex-direction:row;align-items:center;gap:8px"><label for="iniMes" style="margin:0">Mes</label><input type="month" id="iniMes" onchange="renderInicio()"></div>
@@ -228,17 +228,20 @@ details.legacy summary{cursor:pointer;font-weight:700;color:var(--navy);}
     <div class="hint" style="margin-bottom:0">💡 La <strong>tarifa por hora</strong> se define una sola vez: en el <strong>cliente</strong> (tarifa general) o en una <strong>actividad</strong> del cliente (tarifa especial). Al registrar horas el sistema toma esa tarifa y calcula el monto. A fin de mes, la liquidación agrupa las horas de cada cliente por actividad y calcula los totales.</div>
   </div>
   <div id="iniAlertas"></div>
-  <div class="kpi-grid" id="kpiInicio"></div>
-  <div class="res-grid">
-    <div class="card" style="margin-bottom:0">
-      <div class="ch"><span class="ct">👤 Horas del mes por abogado</span></div>
-      <div class="tw"><table><thead><tr><th>Abogado</th><th class="num">Registros</th><th class="num">Horas</th><th class="num">Monto</th></tr></thead><tbody id="bodyIniAb"></tbody></table></div>
-    </div>
-    <div class="card" style="margin-bottom:0">
-      <div class="ch"><span class="ct">🏢 Horas del mes por cliente</span></div>
-      <div class="tw"><table><thead><tr><th>Cliente</th><th class="num">Horas</th><th class="num">Monto</th><th>Liquidación</th></tr></thead><tbody id="bodyIniCli"></tbody></table></div>
+  <div id="iniAdmin">
+    <div class="kpi-grid" id="kpiInicio"></div>
+    <div class="res-grid">
+      <div class="card" style="margin-bottom:0">
+        <div class="ch"><span class="ct">👤 Horas del mes por abogado</span></div>
+        <div class="tw"><table><thead><tr><th>Abogado</th><th class="num">Registros</th><th class="num">Horas</th><th class="num">Monto</th></tr></thead><tbody id="bodyIniAb"></tbody></table></div>
+      </div>
+      <div class="card" style="margin-bottom:0">
+        <div class="ch"><span class="ct">🏢 Horas del mes por cliente</span></div>
+        <div class="tw"><table><thead><tr><th>Cliente</th><th class="num">Horas</th><th class="num">Monto</th><th>Liquidación</th></tr></thead><tbody id="bodyIniCli"></tbody></table></div>
+      </div>
     </div>
   </div>
+  <div id="iniAbogado" style="display:none"></div>
 </div>
 
 <!-- ══════════════ 1. ABOGADOS ══════════════ -->
@@ -883,6 +886,12 @@ function reRenderActive(){
 function renderInicio(){
   var inp=document.getElementById('iniMes');if(!inp.value)inp.value=mesActual();
   var mes=inp.value;
+  /* Vista del abogado: solo su propio trabajo, sin tarifas ni montos */
+  var soloMio=!esAdminTarifas();
+  document.getElementById('iniGuiaCard').style.display=soloMio?'none':'';
+  document.getElementById('iniAdmin').style.display=soloMio?'none':'';
+  document.getElementById('iniAbogado').style.display=soloMio?'':'none';
+  if(soloMio){document.getElementById('iniAlertas').innerHTML='';renderInicioAbogado();return;}
   var regsMes=DB.registros.filter(function(r){return mesKey(r.fecha)===mes;});
   var abAct=abogadosActivos().length;
   var cliAct=clientesActivos();
@@ -934,6 +943,35 @@ function renderInicio(){
     var pend=rc.filter(function(r){return !r.liquidacionId;}).length;
     hC+='<tr><td><strong>'+esc(c.razonSocial)+'</strong></td><td class="num">'+fmtNum(sumHoras(rc))+'</td><td class="num">'+fmtSum(sumMon(rc))+'</td><td>'+(pend?'<span class="badge b-amber">Pendiente</span>':'<span class="badge b-green">Emitida</span>')+'</td></tr>';});
   tbC.innerHTML=hC||'<tr><td colspan="4" class="empty">Sin clientes atendidos en '+mesLabel(mes)+'</td></tr>';
+}
+function renderInicioAbogado(){
+  var ab=miAbogado();var cont=document.getElementById('iniAbogado');
+  if(!ab){cont.innerHTML='<div class="card"><div class="hint">Tu usuario no está vinculado a un abogado. Pide al administrador que registre tu correo en el abogado correspondiente para ver tu trabajo aquí.</div></div>';return;}
+  var mios=DB.registros.filter(function(r){return r.abogadoId===ab.id;});
+  var mesA=mesActual();
+  var clientes=uniq(mios.map(function(r){return r.clienteId;}).filter(Boolean));
+  var actividades=uniq(mios.map(function(r){return r.actividadId;}).filter(Boolean));
+  var kpis=kpi('⏱','Mis horas ('+mesLabel(mesA)+')',fmtNum(sumHoras(mios.filter(function(r){return mesKey(r.fecha)===mesA;}))))+
+    kpi('⏱','Mis horas (total)',fmtNum(sumHoras(mios)))+
+    kpi('🏢','Mis clientes',clientes.length)+
+    kpi('📋','Mis actividades',actividades.length);
+  var filasCli=clientes.map(getCli).filter(Boolean).sort(function(a,b){return(a.razonSocial||'').localeCompare(b.razonSocial||'');}).map(function(c){
+    var rc=mios.filter(function(r){return r.clienteId===c.id;});
+    return '<tr><td><strong>'+esc(c.razonSocial)+'</strong>'+(c.ruc?'<br><span class="sub">'+esc(c.ruc)+'</span>':'')+'</td><td class="num">'+fmtNum(sumHoras(rc))+'</td></tr>';
+  }).join('')||'<tr><td colspan="2" class="empty">Aún no registras horas.</td></tr>';
+  var filasAct=actividades.map(function(id){
+    var ra=mios.filter(function(r){return r.actividadId===id;});var c=getCli(ra[0]&&ra[0].clienteId)||{};
+    return{nom:nomAct(id),cli:c.razonSocial||'—',horas:sumHoras(ra)};
+  }).sort(function(a,b){return a.cli.localeCompare(b.cli)||a.nom.localeCompare(b.nom);}).map(function(x){
+    return '<tr><td><strong>'+esc(x.nom)+'</strong></td><td>'+esc(x.cli)+'</td><td class="num">'+fmtNum(x.horas)+'</td></tr>';
+  }).join('')||'<tr><td colspan="3" class="empty">Aún no registras actividades.</td></tr>';
+  cont.innerHTML=
+    '<div class="card" style="margin-bottom:14px"><div class="ch"><span class="ct">👋 Hola, '+esc(ab.nombre)+'</span></div><div class="hint" style="margin-bottom:0">Aquí ves los <strong>clientes</strong> y <strong>actividades</strong> en los que has trabajado (periodo actual y anteriores).</div></div>'+
+    '<div class="kpi-grid">'+kpis+'</div>'+
+    '<div class="res-grid">'+
+      '<div class="card" style="margin-bottom:0"><div class="ch"><span class="ct">🏢 Mis clientes</span></div><div class="tw"><table><thead><tr><th>Cliente</th><th class="num">Horas</th></tr></thead><tbody>'+filasCli+'</tbody></table></div></div>'+
+      '<div class="card" style="margin-bottom:0"><div class="ch"><span class="ct">📋 Mis actividades</span></div><div class="tw"><table><thead><tr><th>Actividad</th><th>Cliente</th><th class="num">Horas</th></tr></thead><tbody>'+filasAct+'</tbody></table></div></div>'+
+    '</div>';
 }
 function uniq(a){var o=[];a.forEach(function(x){if(o.indexOf(x)<0)o.push(x);});return o;}
 function irLiquidar(mes){document.getElementById('lqMes').value=mes;showTab('liquidacion');}
@@ -1172,7 +1210,7 @@ function saveCliente(){
   save();closeOv('ovCliente');renderClientes();
   if(prev){ofrecerRecalculo(function(r){return r.clienteId===obj.id;},'del cliente');}
   else if(esAdminTarifas()){openActividades(obj.id,true);/* guía: tras crear el cliente, definir sus actividades */}
-  else{alert('✅ Cliente registrado.\nUn administrador debe registrar la tarifa para poder liquidar.');}
+  /* el abogado no recibe mensaje ni gestiona tarifas */
 }
 function delCliente(id){
   var c=getCli(id);if(!c)return;
