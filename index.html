@@ -73,6 +73,7 @@ td.num,th.num{text-align:right;white-space:nowrap;font-variant-numeric:tabular-n
 td.nowrap,th.nowrap{white-space:nowrap;}
 td.cli{min-width:200px;line-height:1.35;}
 td.desc{max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.ocultar-tarifa .col-tar,.ocultar-tarifa .col-cond{display:none;}
 .sub{font-size:11px;color:var(--muted);}
 /* BADGES */
 .badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:700;white-space:nowrap;}
@@ -264,8 +265,8 @@ details.legacy summary{cursor:pointer;font-weight:700;color:var(--navy);}
       <div class="fgroup"><label>Estado</label><select id="filtCliEst" onchange="renderClientes()"><option value="">Activos</option><option value="todos">Todos</option><option value="inactivos">Inactivos</option></select></div>
     </div>
     <div class="tw">
-      <table>
-        <thead><tr><th>Código</th><th>Cliente</th><th class="num">Tarifa / hora</th><th>Condición de cobro</th><th>Actividades</th><th>Abogado responsable</th><th>Acciones</th></tr></thead>
+      <table id="tblCli">
+        <thead><tr><th>Código</th><th>Cliente</th><th class="num col-tar">Tarifa / hora</th><th class="col-cond">Condición de cobro</th><th>Actividades</th><th>Abogado responsable</th><th>Acciones</th></tr></thead>
         <tbody id="bodyCli"></tbody>
       </table>
     </div>
@@ -559,6 +560,7 @@ details.legacy summary{cursor:pointer;font-weight:700;color:var(--navy);}
       <div class="fgroup"><label>Abogado responsable</label><select id="cliAbogado"></select></div>
       <div class="fgroup ff"><label>Banco con que trabaja</label><input type="text" id="cliBanco" placeholder="Ej. BCP, Interbank, BBVA, Scotiabank..."></div>
 
+      <div id="cliTarifaSec" style="display:contents">
       <div class="sec-title">Tarifa y condiciones de cobro</div>
       <div class="fgroup"><label>Tipo de tarifa *</label>
         <select id="cliTipoTarifa" onchange="cliTipoTarifaChg()"><option value="horas">⏱ Por hora</option><option value="proyecto">📦 Por proyecto (monto fijo)</option><option value="exito">🏆 Al éxito (monto al completar)</option></select>
@@ -576,6 +578,7 @@ details.legacy summary{cursor:pointer;font-weight:700;color:var(--navy);}
       <div class="fgroup ff" id="wrapIncluye8"><label>Retención 8% (renta de 4ta categoría)</label>
         <select id="cliIncluye8" onchange="cliEjemplo()"><option value="si">Sí Incluye 8%</option><option value="no">NO Incluye 8%</option></select>
       </div>
+      </div><!-- /cliTarifaSec -->
       <div class="fgroup ff"><label>Notas</label><textarea id="cliNotas" rows="2"></textarea></div>
       <div class="ff"><label class="chk"><input type="checkbox" id="cliActivo" checked><span>Cliente activo</span></label></div>
     </div>
@@ -591,13 +594,13 @@ details.legacy summary{cursor:pointer;font-weight:700;color:var(--navy);}
     <div class="hint" id="actHint"></div>
     <div class="fgr" style="background:#f8fafc;border:1px solid var(--border);border-radius:8px;padding:10px">
       <div class="fgroup" style="flex:1;min-width:220px"><label id="actFormLbl">Nueva actividad</label><input type="text" id="actNom" placeholder="Ej. Compraventa inmueble San Borja" onkeydown="if(event.key==='Enter')saveActividad()"></div>
-      <div class="fgroup" style="width:150px;min-width:130px"><label>Tarifa especial / h</label><input type="number" id="actTar" min="0" step="0.01" placeholder="(la del cliente)"></div>
+      <div class="fgroup" id="actTarWrap" style="width:150px;min-width:130px"><label>Tarifa especial / h</label><input type="number" id="actTar" min="0" step="0.01" placeholder="(la del cliente)"></div>
       <button class="btn btn-navy" id="actBtn" onclick="saveActividad()">+ Agregar</button>
       <button class="btn btn-out" id="actCancel" onclick="resetFormActividad()" style="display:none">Cancelar</button>
     </div>
     <div class="tw">
-      <table>
-        <thead><tr><th>Actividad</th><th class="num">Tarifa / h</th><th class="num">Horas</th><th>Estado</th><th>Acciones</th></tr></thead>
+      <table id="tblAct">
+        <thead><tr><th>Actividad</th><th class="num col-tar">Tarifa / h</th><th class="num">Horas</th><th>Estado</th><th>Acciones</th></tr></thead>
         <tbody id="bodyAct"></tbody>
       </table>
     </div>
@@ -977,11 +980,24 @@ function delAbogado(id){
 }
 
 /* ═══════════════════════ 2. CLIENTES ═══════════════════════ */
+function esAdminTarifas(){return puede('abogados');}/* Administrador / Administrativo gestionan tarifas */
+function cliSinTarifa(c){var tt=c.tipoTarifa||'horas';if(tt==='proyecto')return !(num(c.montoProyecto)>0);if(tt==='exito')return !(num(c.montoExito)>0);return !(num(c.tarifaHora)>0);}
 function condicionTxt(c){
   if(c.aplicaRetencion===false)return'<span class="badge b-gray">Sin retención</span>';
   return c.tarifaNeta?'<span class="badge b-purple">Tarifa neta (bruto ÷ 0.92)</span>':'<span class="badge b-hora">Retención 8%</span>';
 }
+var _alertTarifaShown=false;
+function alertaTarifasPendientes(){
+  if(!esAdminTarifas()||_alertTarifaShown)return;
+  var pend=DB.clientes.filter(function(c){return c.activo!==false&&cliSinTarifa(c);});
+  if(!pend.length)return;
+  _alertTarifaShown=true;
+  var quien=pend[0].razonSocial||pend[0].codigo||'';
+  var msg=pend.length===1?('El cliente «'+quien+'» no tiene tarifa registrada.'):('Hay '+pend.length+' cliente(s) sin tarifa registrada (empezando por «'+quien+'»).');
+  confirm2(msg,'Es necesario registrar su tarifa para poder liquidar. ¿Registrarla ahora?',function(){openCliente(pend[0].id);},'💲 Registrar tarifa',{title:'Tarifa pendiente de registro',danger:false});
+}
 function renderClientes(){
+  var tcli=document.getElementById('tblCli');if(tcli)tcli.classList.toggle('ocultar-tarifa',!esAdminTarifas());
   var tb=document.getElementById('bodyCli');
   var q=(document.getElementById('filtCli').value||'').toLowerCase();
   var est=document.getElementById('filtCliEst').value;
@@ -1001,12 +1017,13 @@ function renderClientes(){
     else tar=num(c.tarifaHora)>0?'<strong>'+fmtMoneda(c.tarifaHora,c.moneda)+'</strong> <span class="sub">/ h</span>':'<span class="badge b-red">Sin tarifa</span>';
     return '<tr class="'+(c.activo===false?'inactivo':'')+'"><td class="nowrap"><strong>'+esc(c.codigo||'—')+'</strong></td>'+
       '<td class="cli"><strong>'+esc(c.razonSocial)+'</strong>'+(c.ruc?'<br><span class="sub">'+(c.tipo==='persona'?'DNI/RUC ':'RUC ')+esc(c.ruc)+'</span>':'')+'</td>'+
-      '<td class="num">'+tar+'</td><td>'+condicionTxt(c)+'</td>'+
+      '<td class="num col-tar">'+tar+'</td><td class="col-cond">'+condicionTxt(c)+'</td>'+
       '<td>'+(acts.length?'<span class="badge '+(activas?'b-cat':'b-gray')+'">'+activas+' activa(s)</span>'+(esp?' <span class="sub">'+esp+' con tarifa especial</span>':''):'<span class="badge b-amber">Ninguna</span>')+'</td>'+
       '<td>'+esc(c.abogadoId?nomAb(c.abogadoId):'—')+'</td>'+
       '<td><div class="acts"><button class="btn btn-navy btn-sm" onclick="openActividades('+c.id+')">📋 Actividades</button>'+
       (editable?'<button class="btn btn-amber btn-sm" onclick="openCliente('+c.id+')">✏</button><button class="btn btn-red btn-sm" onclick="delCliente('+c.id+')">🗑</button>':'')+'</div></td></tr>';
   }).join('');
+  alertaTarifasPendientes();
 }
 function nextCodigoCliente(){
   var mx=0;DB.clientes.forEach(function(c){var m=(c.codigo||'').match(/(\d+)\s*$/);if(m){var n=parseInt(m[1],10);if(n>mx)mx=n;}});
@@ -1119,6 +1136,8 @@ function openCliente(id){
     if(c.abogadoId){var s=document.getElementById('cliAbogado');if(!s.querySelector('option[value="'+c.abogadoId+'"]'))s.innerHTML+='<option value="'+c.abogadoId+'">'+esc(nomAb(c.abogadoId))+'</option>';s.value=c.abogadoId;}
   }
   cliTipoTarifaChg();cliComprobanteChg();cliEjemplo();
+  /* El abogado no define tarifas: se oculta toda la sección (la registra el administrador) */
+  document.getElementById('cliTarifaSec').style.display=esAdminTarifas()?'contents':'none';
   if(c)cliMostrarDatos();else cliPaso1();/* al editar se muestran todos los campos; al crear, primero el RUC */
   openOv('ovCliente');
 }
@@ -1128,9 +1147,11 @@ function saveCliente(){
   var tarifa=r2(document.getElementById('cliTarifa').value);
   var montoProyecto=r2(document.getElementById('cliMontoProyecto').value);
   var montoExito=r2(document.getElementById('cliMontoExito').value);
-  if(tipoTarifa==='horas'&&!(tarifa>0)){alert('Ingresa la tarifa por hora del cliente. Es la base para calcular sus liquidaciones.');document.getElementById('cliTarifa').focus();return;}
-  if(tipoTarifa==='proyecto'&&!(montoProyecto>0)){alert('Ingresa el monto del proyecto.');document.getElementById('cliMontoProyecto').focus();return;}
-  if(tipoTarifa==='exito'&&!(montoExito>0)){alert('Ingresa el monto al éxito (el que se obtendrá al completar la tarea).');document.getElementById('cliMontoExito').focus();return;}
+  if(esAdminTarifas()){/* la tarifa solo se exige al administrador; el abogado la deja pendiente */
+    if(tipoTarifa==='horas'&&!(tarifa>0)){alert('Ingresa la tarifa por hora del cliente. Es la base para calcular sus liquidaciones.');document.getElementById('cliTarifa').focus();return;}
+    if(tipoTarifa==='proyecto'&&!(montoProyecto>0)){alert('Ingresa el monto del proyecto.');document.getElementById('cliMontoProyecto').focus();return;}
+    if(tipoTarifa==='exito'&&!(montoExito>0)){alert('Ingresa el monto al éxito (el que se obtendrá al completar la tarea).');document.getElementById('cliMontoExito').focus();return;}
+  }
   var ruc=document.getElementById('cliRuc').value.trim();
   var id=parseInt(document.getElementById('cliId').value)||0;
   if(ruc&&DB.clientes.some(function(x){return x.id!==id&&x.ruc===ruc;})){alert('Ya existe un cliente con ese RUC/DNI.');return;}
@@ -1149,8 +1170,9 @@ function saveCliente(){
   if(prev){obj.id=id;DB.clientes[DB.clientes.findIndex(function(x){return x.id===id;})]=obj;}
   else{obj.id=nid(DB.clientes);DB.clientes.push(obj);}
   save();closeOv('ovCliente');renderClientes();
-  if(prev)ofrecerRecalculo(function(r){return r.clienteId===obj.id;},'del cliente');
-  else openActividades(obj.id,true);/* guía: tras crear el cliente, definir sus actividades */
+  if(prev){ofrecerRecalculo(function(r){return r.clienteId===obj.id;},'del cliente');}
+  else if(esAdminTarifas()){openActividades(obj.id,true);/* guía: tras crear el cliente, definir sus actividades */}
+  else{alert('✅ Cliente registrado.\nUn administrador debe registrar la tarifa para poder liquidar.');}
 }
 function delCliente(id){
   var c=getCli(id);if(!c)return;
@@ -1207,8 +1229,14 @@ function openActividades(cliId,esNuevo){
   var c=getCli(cliId);if(!c)return;
   document.getElementById('actCliId').value=c.id;
   document.getElementById('actCliNom').textContent=c.razonSocial;
-  document.getElementById('actHint').innerHTML=(esNuevo?'✅ Cliente guardado. Ahora registra sus <strong>actividades</strong> (asuntos o trabajos que se le atienden). ':'')+
-    'Tarifa general del cliente: <strong>'+fmtMoneda(c.tarifaHora,c.moneda)+' / hora</strong>. Deja la tarifa especial en blanco para usar esa tarifa; escríbela solo si esta actividad se cobra distinto.';
+  var admTar=esAdminTarifas();
+  document.getElementById('actHint').innerHTML=admTar?
+    ((esNuevo?'✅ Cliente guardado. Ahora registra sus <strong>actividades</strong> (asuntos o trabajos que se le atienden). ':'')+
+      'Tarifa general del cliente: <strong>'+fmtMoneda(c.tarifaHora,c.moneda)+' / hora</strong>. Deja la tarifa especial en blanco para usar esa tarifa; escríbela solo si esta actividad se cobra distinto.')
+    :'Registra las <strong>actividades</strong> (asuntos o trabajos que se le atienden) del cliente.';
+  /* El abogado no ve ni edita tarifas */
+  document.getElementById('actTarWrap').style.display=admTar?'':'none';
+  document.getElementById('tblAct').classList.toggle('ocultar-tarifa',!admTar);
   var editable=puede('abogados');
   document.getElementById('actNom').disabled=!editable;document.getElementById('actTar').disabled=!editable;document.getElementById('actBtn').disabled=!editable;
   resetFormActividad();renderActividades();openOv('ovActividades');
@@ -1223,7 +1251,7 @@ function renderActividades(){
     var h=sumHoras(DB.registros.filter(function(r){return r.actividadId===a.id;}));
     var esp=num(a.tarifaHora)>0;
     return '<tr class="'+(a.estado==='Cerrada'?'inactivo':'')+'"><td><strong>'+esc(a.nombre)+'</strong></td>'+
-      '<td class="num">'+(esp?'<strong>'+fmtMoneda(a.tarifaHora,c.moneda)+'</strong> <span class="badge b-purple">especial</span>':fmtMoneda(c.tarifaHora,c.moneda)+' <span class="sub">(del cliente)</span>')+'</td>'+
+      '<td class="num col-tar">'+(esp?'<strong>'+fmtMoneda(a.tarifaHora,c.moneda)+'</strong> <span class="badge b-purple">especial</span>':fmtMoneda(c.tarifaHora,c.moneda)+' <span class="sub">(del cliente)</span>')+'</td>'+
       '<td class="num">'+fmtNum(h)+'</td><td>'+(a.estado==='Cerrada'?'<span class="badge b-gray">Cerrada</span>':'<span class="badge b-green">Activa</span>')+'</td>'+
       '<td>'+(editable?'<div class="acts"><button class="btn btn-amber btn-sm" onclick="editActividad('+a.id+')">✏</button>'+
         '<button class="btn btn-out btn-sm" onclick="toggleActividad('+a.id+')">'+(a.estado==='Cerrada'?'Reabrir':'Cerrar')+'</button>'+
