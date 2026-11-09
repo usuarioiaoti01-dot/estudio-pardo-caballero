@@ -74,6 +74,7 @@ td.nowrap,th.nowrap{white-space:nowrap;}
 td.cli{min-width:200px;line-height:1.35;}
 td.desc{max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .ocultar-tarifa .col-tar,.ocultar-tarifa .col-cond{display:none;}
+.ocultar-dinero .col-tar,.ocultar-dinero .col-money{display:none;}
 .sub{font-size:11px;color:var(--muted);}
 /* BADGES */
 .badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:700;white-space:nowrap;}
@@ -316,8 +317,8 @@ details.legacy summary{cursor:pointer;font-weight:700;color:var(--navy);}
       <div class="fgroup"><label>Estado</label><select id="hfEst" onchange="renderHoras()"><option value="">Todos</option><option value="pend">Por liquidar</option><option value="liq">Liquidados</option></select></div>
     </div>
     <div class="tw">
-      <table style="min-width:980px">
-        <thead><tr><th>Fecha</th><th>Abogado</th><th>Cliente</th><th>Actividad</th><th>Descripción</th><th class="num">Horas</th><th class="num">Tarifa</th><th class="num">Monto</th><th>Estado</th><th>Acciones</th></tr></thead>
+      <table id="tblHoras" style="min-width:980px">
+        <thead><tr><th>Fecha</th><th>Abogado</th><th>Cliente</th><th>Actividad</th><th>Descripción</th><th class="num">Horas</th><th class="num col-tar">Tarifa</th><th class="num col-money">Monto</th><th>Estado</th><th>Acciones</th></tr></thead>
         <tbody id="bodyHoras"></tbody>
         <tfoot id="footHoras"></tfoot>
       </table>
@@ -849,7 +850,7 @@ function miAbogado(){
   var e=cloudUser.email.toLowerCase();
   return DB.abogados.find(function(a){return(a.email||'').toLowerCase()===e;})||null;
 }
-function soloMisHoras(){return miRol()==='Abogado Externo';}
+function soloMisHoras(){return !esAdminTarifas();}/* Abogado y Abogado Externo: solo ven sus propias horas */
 function puede(tab){return(PERMISOS[miRol()]||PERMISOS['Abogado']).indexOf(tab)>=0;}
 function aplicarPermisos(){
   document.querySelectorAll('.nav-btn[data-tab]').forEach(function(b){b.style.display=puede(b.getAttribute('data-tab'))?'':'none';});
@@ -1275,15 +1276,16 @@ function openActividades(cliId,esNuevo){
   /* El abogado no ve ni edita tarifas */
   document.getElementById('actTarWrap').style.display=admTar?'':'none';
   document.getElementById('tblAct').classList.toggle('ocultar-tarifa',!admTar);
-  var editable=puede('abogados');
-  document.getElementById('actNom').disabled=!editable;document.getElementById('actTar').disabled=!editable;document.getElementById('actBtn').disabled=!editable;
+  /* cualquier usuario (incluido el abogado) puede crear/editar actividades por nombre; la tarifa es solo del administrador */
+  var editable=!!cloudUser;
+  document.getElementById('actNom').disabled=!editable;document.getElementById('actTar').disabled=!admTar;document.getElementById('actBtn').disabled=!editable;
   resetFormActividad();renderActividades();openOv('ovActividades');
   setTimeout(function(){if(editable)document.getElementById('actNom').focus();},50);
 }
 function renderActividades(){
   var cliId=parseInt(document.getElementById('actCliId').value);var c=getCli(cliId);
   var acts=actsDe(cliId).sort(function(a,b){return(a.estado==='Cerrada')-(b.estado==='Cerrada')||a.nombre.localeCompare(b.nombre);});
-  var tb=document.getElementById('bodyAct');var editable=puede('abogados');
+  var tb=document.getElementById('bodyAct');var editable=!!cloudUser;
   if(!acts.length){tb.innerHTML='<tr><td colspan="5" class="empty">Sin actividades. Agrega la primera arriba.</td></tr>';return;}
   tb.innerHTML=acts.map(function(a){
     var h=sumHoras(DB.registros.filter(function(r){return r.actividadId===a.id;}));
@@ -1311,11 +1313,11 @@ function editActividad(id){
 function saveActividad(){
   var cliId=parseInt(document.getElementById('actCliId').value);
   var nom=document.getElementById('actNom').value.trim();if(!nom){alert('Escribe el nombre de la actividad.');return;}
-  var tar=r2(document.getElementById('actTar').value);
+  var admTar=esAdminTarifas();var tar=admTar?r2(document.getElementById('actTar').value):0;
   var id=parseInt(document.getElementById('actEditId').value)||0;
   if(actsDe(cliId).some(function(a){return a.id!==id&&a.nombre.toLowerCase()===nom.toLowerCase();})){alert('Este cliente ya tiene una actividad con ese nombre.');return;}
   var nueva=null;
-  if(id){var a=getAct(id);a.nombre=nom;a.tarifaHora=tar>0?tar:0;}
+  if(id){var a=getAct(id);a.nombre=nom;if(admTar)a.tarifaHora=tar>0?tar:0;/* el abogado no modifica la tarifa */}
   else{nueva={id:nid(DB.actividades),clienteId:cliId,nombre:nom,tarifaHora:tar>0?tar:0,estado:'Activa'};DB.actividades.push(nueva);}
   save();resetFormActividad();renderActividades();
   if(id)ofrecerRecalculo(function(r){return r.actividadId===id;},'de la actividad');
@@ -1337,19 +1339,20 @@ function cerrarActividades(){
 function initHoras(){
   if(!document.getElementById('hFecha').value)document.getElementById('hFecha').value=today();
   if(document.getElementById('hfMes').value===''&&!document.getElementById('hfMes').dataset.init){document.getElementById('hfMes').value=mesActual();document.getElementById('hfMes').dataset.init='1';}
-  var abs=abogadosActivos();var yo=miAbogado();
+  var abs=abogadosActivos();var yo=miAbogado();var solo=soloMisHoras();
   if(yo&&abs.indexOf(yo)<0)abs.push(yo);
-  fillSelect('hAbogado',abs,'— Seleccionar —');
+  /* El abogado solo se ve a sí mismo en los menús de «Abogado»; no a los demás */
+  fillSelect('hAbogado',solo?(yo?[yo]:[]):abs,solo?null:'— Seleccionar —');
   var sAb=document.getElementById('hAbogado');
   if(yo&&!sAb.value&&!editHorasId)sAb.value=yo.id;
-  sAb.disabled=soloMisHoras()&&!!yo;
+  sAb.disabled=solo&&!!yo;
   fillSelect('hCliente',clientesActivos(),'— Seleccionar —',null,function(c){return c.razonSocial+(c.ruc?' ('+c.ruc+')':'');});
   fillActividadesHoras();
-  fillSelect('hfAb',DB.abogados.slice().sort(function(a,b){return a.nombre.localeCompare(b.nombre);}),'Todos');
   var sfCli=document.getElementById('hfCli');var cv=sfCli.value;
+  fillSelect('hfAb',solo?(yo?[yo]:[]):DB.abogados.slice().sort(function(a,b){return a.nombre.localeCompare(b.nombre);}),solo?null:'Todos');
   fillSelect('hfCli',DB.clientes.slice().sort(function(a,b){return a.razonSocial.localeCompare(b.razonSocial);}),'Todos',null,function(c){return c.razonSocial;});
   sfCli.innerHTML+='<option value="__sin">⚠ Sin cliente / actividad</option>';sfCli.value=cv;
-  if(soloMisHoras()){var f=document.getElementById('hfAb');f.value=yo?yo.id:'';f.disabled=true;}
+  if(solo){var f=document.getElementById('hfAb');f.value=yo?yo.id:'';f.disabled=true;}
   renderCrono();calcHoras();renderHoras();
 }
 function fillActividadesHoras(){
@@ -1365,7 +1368,6 @@ function fillActividadesHoras(){
 function nuevaActividadDesdeHoras(){
   var cliId=parseInt(document.getElementById('hCliente').value)||0;
   if(!cliId){alert('Primero elige el cliente.');return;}
-  if(!puede('abogados')){alert('Solo el Administrador o Administrativo puede crear actividades. Pídeles que la registren.');return;}
   actDesdeHoras=true;openActividades(cliId);
 }
 function calcHoras(){
@@ -1373,6 +1375,11 @@ function calcHoras(){
   var actId=parseInt(document.getElementById('hActividad').value)||0;
   var horas=parseHoras(document.getElementById('hHoras').value);
   if(!actId){el.className='calc-box vacio';el.innerHTML='Selecciona cliente, actividad y horas para ver el cálculo.';return;}
+  if(!esAdminTarifas()){/* el abogado no ve tarifas ni montos */
+    el.className='calc-box';
+    el.innerHTML=horas>0?('Registrarás <strong>'+fmtHM(horas)+'</strong> ('+fmtNum(horas)+' h) en esta actividad.'):'Ingresa las horas trabajadas.';
+    return;
+  }
   var t=tarifaDe(actId);
   if(!(t.valor>0)){el.className='calc-box';el.innerHTML='⚠ Este cliente no tiene tarifa por hora. Defínela en <strong>Paso 2 · Clientes y tarifas</strong>.';return;}
   var orig=t.origen==='actividad'?'tarifa especial de la actividad':'tarifa general del cliente';
@@ -1451,6 +1458,7 @@ function horasFiltradas(){
   }).sort(function(a,b){return(b.fecha||'').localeCompare(a.fecha||'')||b.id-a.id;});
 }
 function renderHoras(){
+  var th=document.getElementById('tblHoras');if(th)th.classList.toggle('ocultar-dinero',!esAdminTarifas());/* el abogado no ve tarifa ni monto */
   var regs=horasFiltradas();var tb=document.getElementById('bodyHoras');
   if(!regs.length){tb.innerHTML='<tr><td colspan="10" class="empty">No hay horas registradas con estos filtros.</td></tr>';document.getElementById('footHoras').innerHTML='';return;}
   tb.innerHTML=regs.map(function(r){
@@ -1458,11 +1466,11 @@ function renderHoras(){
     var incompleto=!r.clienteId||!r.actividadId;
     return '<tr><td class="nowrap">'+fmtDate(r.fecha)+'</td><td>'+esc(nomAb(r.abogadoId))+'</td><td>'+(r.clienteId?esc(nomCli(r.clienteId)):'<span class="badge b-red">Sin cliente</span>')+'</td>'+
       '<td>'+(r.actividadId?esc(nomAct(r.actividadId)):'<span class="badge b-red">Sin actividad</span>')+'</td><td class="desc" title="'+esc(r.descripcion)+'">'+esc(r.descripcion||'—')+'</td>'+
-      '<td class="num">'+fmtNum(r.horas)+'</td><td class="num">'+fmtMoneda(r.tarifa,r.moneda)+'</td><td class="num"><strong>'+fmtMoneda(r.monto,r.moneda)+'</strong></td>'+
+      '<td class="num">'+fmtNum(r.horas)+'</td><td class="num col-tar">'+fmtMoneda(r.tarifa,r.moneda)+'</td><td class="num col-money"><strong>'+fmtMoneda(r.monto,r.moneda)+'</strong></td>'+
       '<td>'+(L?'<span class="badge b-green" title="Liquidado">🔒 '+esc(L.numero)+'</span>':(incompleto?'<span class="badge b-red">Incompleto</span>':'<span class="badge b-amber">Por liquidar</span>'))+'</td>'+
       '<td>'+(L?'':'<div class="acts"><button class="btn btn-amber btn-sm" onclick="editHoras('+r.id+')">✏</button><button class="btn btn-red btn-sm" onclick="delHoras('+r.id+')">🗑</button></div>')+'</td></tr>';
   }).join('');
-  document.getElementById('footHoras').innerHTML='<tr class="tfoot-row"><td colspan="5">TOTAL — '+regs.length+' registro(s)</td><td class="num">'+fmtNum(sumHoras(regs))+'</td><td></td><td class="num">'+fmtSum(sumMon(regs))+'</td><td colspan="2"></td></tr>';
+  document.getElementById('footHoras').innerHTML='<tr class="tfoot-row"><td colspan="5">TOTAL — '+regs.length+' registro(s)</td><td class="num">'+fmtNum(sumHoras(regs))+'</td><td class="col-tar"></td><td class="num col-money">'+fmtSum(sumMon(regs))+'</td><td colspan="2"></td></tr>';
 }
 function exportHorasCSV(){
   var rows=[['Fecha','Abogado','Cliente','RUC','Actividad','Descripcion','Horas','Tarifa','Moneda','Monto','Estado']];
