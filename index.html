@@ -372,16 +372,12 @@ details.legacy summary{cursor:pointer;font-weight:700;color:var(--navy);}
       <div class="ch">
         <span class="ct">📥 Ingresos — Recibos por Honorarios (RHE)</span>
         <div style="display:flex;gap:6px;flex-wrap:wrap">
-          <button class="btn btn-purple" onclick="document.getElementById('xmlInput').click()">⬆ Importar recibos XML</button>
+          <button class="btn btn-purple" onclick="sincronizarCarpetaRHE()" title="Buscar y cargar los recibos nuevos de la carpeta configurada">🔄 Actualizar desde carpeta</button>
+          <button class="btn btn-out btn-sm" onclick="document.getElementById('xmlInput').click()" title="Cargar manualmente archivos XML">⬆ Importar XML</button>
           <input type="file" id="xmlInput" accept=".xml" multiple style="display:none" onchange="importarRHE(this)">
           <button class="btn btn-navy" onclick="openIngreso()">+ Nuevo ingreso</button>
           <button class="btn btn-green btn-sm" onclick="exportIngCSV()">⬇ CSV</button>
         </div>
-      </div>
-      <div class="hint">
-        💡 <strong>Importar recibos:</strong> haz clic en <em>Importar recibos XML</em> y selecciona los archivos <strong>.xml</strong> de la carpeta
-        <code>RHE - Recibos por Honorarios\XML</code>. Puedes seleccionar todos a la vez (Ctrl+A). Cada mes vuelve a importar los nuevos recibos:
-        los ya cargados se detectan y se omiten automáticamente. Los recibos con «Revertido» en el nombre se marcan y no suman a los totales.
       </div>
       <div id="ingImportMsg" class="import-msg"></div>
       <div class="fgr">
@@ -414,7 +410,7 @@ details.legacy summary{cursor:pointer;font-weight:700;color:var(--navy);}
       <div id="ingPager" class="pager"></div>
     </div>
     <div class="card">
-      <div class="ch"><span class="ct">📆 Resumen de Ingresos por Mes</span></div>
+      <div class="ch"><span class="ct">📆 Resumen de Ingresos por Mes <span style="font-weight:400;color:var(--muted);font-size:13px">— últimos 6 meses del año en curso</span></span></div>
       <div class="tw">
         <table>
           <thead><tr><th>Mes</th><th class="num">Recibos</th><th class="num">Neto Soles (S/)</th><th class="num">Neto Dólares (US$)</th></tr></thead>
@@ -617,14 +613,30 @@ details.legacy summary{cursor:pointer;font-weight:700;color:var(--navy);}
   </div>
 </div>
 
+<!-- Modal Registrar Pago de Recibo -->
+<div class="overlay" id="ovPago">
+  <div class="modal" style="max-width:480px">
+    <div class="mh"><span class="mt">💵 Registrar pago de recibo</span><button class="x-btn" onclick="closeOv('ovPago')">✕</button></div>
+    <div id="pagoResumen" style="background:#f0f4f8;border-radius:10px;padding:12px 14px;margin-bottom:14px;font-size:14px;line-height:1.6"></div>
+    <div class="fg">
+      <div class="fgroup"><label>Fecha de pago *</label><input type="date" id="pagoFecha"></div>
+      <div class="fgroup"><label>Monto pagado *</label><input type="number" id="pagoMonto" min="0" step="0.01" placeholder="0.00"></div>
+    </div>
+    <div class="fgroup ff"><label>Notas del pago</label><textarea id="pagoNotas" rows="2" placeholder="Nº de operación, banco, etc."></textarea></div>
+    <input type="hidden" id="pagoId">
+    <div class="mf"><button class="btn btn-out" onclick="closeOv('ovPago')">Cancelar</button><button class="btn btn-green" onclick="savePago()">✅ Registrar pago</button></div>
+  </div>
+</div>
+
 <!-- Modal Gasto -->
 <div class="overlay" id="ovGasto">
   <div class="modal" style="max-width:520px">
     <div class="mh"><span class="mt" id="titGasto">Nuevo Gasto</span><button class="x-btn" onclick="closeOv('ovGasto')">✕</button></div>
     <div class="fg">
       <div class="fgroup"><label>Fecha *</label><input type="date" id="gasFecha"></div>
-      <div class="fgroup"><label>Tipo de egreso *</label><select id="gasTipo"><option value="estudio">🏢 Estudio</option><option value="personal">👤 Personal</option></select></div>
-      <div class="fgroup"><label>Categoría *</label><select id="gasCat"></select></div>
+      <div class="fgroup"><label>Tipo de egreso *</label><input type="text" id="gasTipoLbl" readonly style="background:#f0f4f8;font-weight:600"><input type="hidden" id="gasTipo"></div>
+      <div class="fgroup"><label>Categoría *</label><select id="gasCat" onchange="gasCatChg()"></select></div>
+      <div class="fgroup ff" id="gasCatNuevaWrap" style="display:none"><label>Nueva categoría *</label><input type="text" id="gasCatNueva" placeholder="Nombre de la nueva categoría"></div>
       <div class="fgroup"><label>Monto (S/) *</label><input type="number" id="gasMonto" min="0" step="0.01" placeholder="0.00"></div>
       <div class="fgroup ff"><label>Descripción</label><textarea id="gasDesc" rows="2" placeholder="Detalle del gasto..."></textarea></div>
       <div class="fgroup ff"><label>Notas</label><textarea id="gasNotas" rows="2" placeholder="Observaciones..."></textarea></div>
@@ -705,7 +717,7 @@ var DOC_ID='v2', DOC_V1='main';
 var SUPA_URL='https://kkgpssccqmsfhwutkvuq.supabase.co';
 var SUPA_KEY='sb_publishable_ee8CG_E6NKG0QynSy0OK8w_qURhVgwt';
 var RET=0.08;
-var KEYS=['abogados','clientes','actividades','registros','liquidaciones','ingresos','gastos','liquidacionesV1'];
+var KEYS=['abogados','clientes','actividades','registros','liquidaciones','ingresos','gastos','liquidacionesV1','gastoCats'];
 var supa=null,cloudUser=null,cloudReady=false,saveTimer=null,applyingRemote=false,realtimeChan=null,cfCb=null;
 var editHorasId=null;
 
@@ -1627,11 +1639,11 @@ function loadCloud(){
   supa.from('estudio_data').select('data').eq('id',DOC_ID).maybeSingle().then(function(res){
     if(res.error){setInfo('⚠ '+esc(res.error.message),'#fca5a5');return;}/* ante error NO se migra ni se sobrescribe nada */
     var d=res.data?res.data.data:null;
-    if(d&&d._ver===2){DB=normalizaDB(d);cloudReady=true;setInfo('☁ Datos al día');aplicarPermisos();reRenderActive();return;}
+    if(d&&d._ver===2){DB=normalizaDB(d);cloudReady=true;setInfo('☁ Datos al día');aplicarPermisos();reRenderActive();setTimeout(autoSyncRHE,600);return;}
     /* Primera vez en v.02: copiar y convertir los datos de la versión anterior (sin tocarlos) */
     supa.from('estudio_data').select('data').eq('id',DOC_V1).maybeSingle().then(function(r1){
       if(r1.error){setInfo('⚠ '+esc(r1.error.message),'#fca5a5');return;}
-      DB=migrarV1(r1.data?r1.data.data:{});cloudReady=true;pushCloud();aplicarPermisos();reRenderActive();
+      DB=migrarV1(r1.data?r1.data.data:{});cloudReady=true;pushCloud();aplicarPermisos();reRenderActive();setTimeout(autoSyncRHE,600);
       setInfo('✅ Datos de la versión anterior convertidos a v.02');
     });
   });
@@ -1738,7 +1750,7 @@ function renderIngresos(){
       '<td class="num">'+fmtMoneda(x.bruto,x.moneda)+'</td><td class="num">'+fmtMoneda(x.retencion,x.moneda)+'</td><td class="num"><strong>'+fmtMoneda(x.neto,x.moneda)+'</strong></td>'+
       '<td class="nowrap">'+badgeEstadoIng(x.estado)+'</td>'+
       '<td class="nowrap"><span class="badge '+(esUsd?'b-amber':'b-hora')+'">'+(esUsd?'US$':'S/')+'</span> <span class="badge '+(x.origen==='rhe'?'b-purple':'b-cat')+'">'+(x.origen==='rhe'?'XML':'Manual')+'</span></td>'+
-      '<td class="nowrap"><div class="acts"><button class="btn btn-amber btn-sm" onclick="openIngreso('+x.id+')">✏</button><button class="btn btn-red btn-sm" onclick="delIngreso('+x.id+')">🗑</button></div></td>';
+      '<td class="nowrap"><div class="acts">'+(rev?'':'<button class="btn btn-green btn-sm" title="Registrar pago" onclick="openPago('+x.id+')">💵</button>')+'<button class="btn btn-amber btn-sm" title="Modificar" onclick="openIngreso('+x.id+')">✏</button><button class="btn btn-red btn-sm" title="Borrar" onclick="delIngreso('+x.id+')">🗑</button></div></td>';
     tb.appendChild(tr);
   });
   var fr='';
@@ -1767,8 +1779,10 @@ function renderIngPager(total,totPag){
 function renderIngMeses(){
   var map={};
   DB.ingresos.forEach(function(x){if(esRevertido(x))return;var k=mesKey(x.fecha);if(!k)return;if(!map[k])map[k]={n:0,penN:0,usdN:0};map[k].n++;if(x.moneda==='USD')map[k].usdN+=num(x.neto);else map[k].penN+=num(x.neto);});
-  var keys=Object.keys(map).sort().reverse();var tb=document.getElementById('bodyIngMes');tb.innerHTML='';
-  if(!keys.length){tb.innerHTML='<tr><td colspan="4" class="empty">Sin datos</td></tr>';return;}
+  var anio=today().slice(0,4);
+  var keys=Object.keys(map).filter(function(k){return k.slice(0,4)===anio;}).sort().reverse().slice(0,6);
+  var tb=document.getElementById('bodyIngMes');tb.innerHTML='';
+  if(!keys.length){tb.innerHTML='<tr><td colspan="4" class="empty">Sin datos del año '+anio+'</td></tr>';return;}
   keys.forEach(function(k){var d=map[k];var tr=document.createElement('tr');tr.innerHTML='<td><strong>'+mesLabel(k)+'</strong></td><td class="num">'+d.n+'</td><td class="num">'+(d.penN?fmtMoneda(d.penN,'PEN'):'—')+'</td><td class="num">'+(d.usdN?fmtMoneda(d.usdN,'USD'):'—')+'</td>';tb.appendChild(tr);});
 }
 function lockCamposIngreso(lock){
@@ -1803,8 +1817,32 @@ function saveIngreso(){
   if(!bruto&&!neto){alert('Ingrese el importe (renta bruta).');return;}
   var id=parseInt(document.getElementById('ingId').value);
   var obj={numero:document.getElementById('ingNumero').value.trim(),fecha:fecha,ruc:document.getElementById('ingRuc').value.trim(),cliente:document.getElementById('ingCliente').value.trim(),descripcion:document.getElementById('ingDesc').value.trim(),bruto:bruto,retencion:num(document.getElementById('ingRet').value),neto:neto,moneda:document.getElementById('ingMoneda').value,estado:document.getElementById('ingEstado').value,notas:document.getElementById('ingNotas').value.trim(),origen:'manual'};
-  if(id){var i=DB.ingresos.findIndex(function(v){return v.id===id;});if(i>=0){obj.id=id;obj.origen=DB.ingresos[i].origen||'manual';DB.ingresos[i]=obj;}}else{obj.id=nid(DB.ingresos);DB.ingresos.push(obj);}
+  if(id){var i=DB.ingresos.findIndex(function(v){return v.id===id;});if(i>=0){var prev=DB.ingresos[i];obj.id=id;obj.origen=prev.origen||'manual';
+    /* conservar los datos del pago registrado */
+    if(prev.fechaPago!==undefined)obj.fechaPago=prev.fechaPago;if(prev.montoPagado!==undefined)obj.montoPagado=prev.montoPagado;if(prev.pagoNotas!==undefined)obj.pagoNotas=prev.pagoNotas;
+    DB.ingresos[i]=obj;}}else{obj.id=nid(DB.ingresos);DB.ingresos.push(obj);}
   save();closeOv('ovIngreso');renderIngresos();
+}
+function openPago(id){
+  var x=DB.ingresos.find(function(v){return v.id===id;});if(!x)return;
+  document.getElementById('pagoResumen').innerHTML=
+    '<strong>'+esc(x.numero||'—')+'</strong> · '+fmtDate(x.fecha)+'<br>'+
+    esc(x.cliente||'—')+(x.ruc?' <span style="color:var(--muted)">('+esc(x.ruc)+')</span>':'')+'<br>'+
+    'Importe del recibo: <strong>'+fmtMoneda(x.neto,x.moneda)+'</strong> ('+((x.moneda==='USD')?'Dólares':'Soles')+')';
+  document.getElementById('pagoFecha').value=x.fechaPago||today();
+  var md=(x.montoPagado!=null?x.montoPagado:x.neto);document.getElementById('pagoMonto').value=md?Number(md).toFixed(2):'';
+  document.getElementById('pagoNotas').value=x.pagoNotas||'';
+  document.getElementById('pagoId').value=x.id;
+  openOv('ovPago');
+}
+function savePago(){
+  var id=parseInt(document.getElementById('pagoId').value);
+  var fp=document.getElementById('pagoFecha').value;if(!fp){alert('Ingrese la fecha de pago (día, mes y año).');return;}
+  var mp=num(document.getElementById('pagoMonto').value);if(!mp){alert('Ingrese el monto pagado.');return;}
+  var i=DB.ingresos.findIndex(function(v){return v.id===id;});if(i<0)return;
+  DB.ingresos[i].fechaPago=fp;DB.ingresos[i].montoPagado=mp;DB.ingresos[i].pagoNotas=document.getElementById('pagoNotas').value.trim();
+  DB.ingresos[i].estado='Pagado';
+  save();closeOv('ovPago');renderIngresos();
 }
 function delIngreso(id){var x=DB.ingresos.find(function(v){return v.id===id;});confirm2('¿Borrar el ingreso "'+((x&&x.numero)||'')+'"?','',function(){DB.ingresos=DB.ingresos.filter(function(v){return v.id!==id;});save();renderIngresos();});}
 function limpFiltIng(){['ingFAnio','ingFMes','ingFCli','ingFMoneda','ingFEstado'].forEach(function(f){document.getElementById(f).value='';});ingPage=1;renderIngresos();}
@@ -1859,6 +1897,66 @@ function importarRHE(input){
   });
 }
 
+/* ── Sincronización automática desde la carpeta de recibos (File System Access API) ──
+   Ruta esperada: C:\Users\mmontoya\OneDrive\Katherine  (el navegador pide elegirla una vez;
+   luego se recuerda y en cada inicio de sesión se buscan y cargan los recibos nuevos). */
+var _rheSyncing=false;
+function _idbRHE(mode,val){return new Promise(function(res){try{var r=indexedDB.open('ci_fs',1);
+  r.onupgradeneeded=function(){r.result.createObjectStore('h');};
+  r.onsuccess=function(){var db=r.result;var st=db.transaction('h',mode==='set'?'readwrite':'readonly').objectStore('h');
+    var op=mode==='set'?st.put(val,'rheDir'):st.get('rheDir');
+    op.onsuccess=function(){res(mode==='set'?true:(op.result||null));};op.onerror=function(){res(null);};};
+  r.onerror=function(){res(null);};}catch(e){res(null);}});}
+function _fsaDisponible(){return typeof window.showDirectoryPicker==='function';}
+function _msgIng(t){var m=document.getElementById('ingImportMsg');if(m)m.textContent=t;}
+async function _scanDirRHE(dir){
+  var nuevos=0,dup=0,err=0;
+  for await(var ent of dir.entries()){
+    var name=ent[0],h=ent[1];
+    if(h.kind!=='file'||!/\.xml$/i.test(name))continue;
+    try{var f=await h.getFile();var tx=await f.text();var p=parseRHE(tx,name);
+      if(p){if(DB.ingresos.some(function(x){return x.numero&&p.numero&&x.numero===p.numero;}))dup++;else{p.id=nid(DB.ingresos);DB.ingresos.push(p);nuevos++;}}
+      else err++;
+    }catch(ex){err++;}
+  }
+  if(nuevos){save();renderIngresos();}
+  return{nuevos:nuevos,dup:dup,err:err};
+}
+async function sincronizarCarpetaRHE(){
+  if(!_fsaDisponible()){alert('Tu navegador no permite leer carpetas locales automáticamente.\nUsa Chrome o Edge, o carga los XML con «Importar XML».');return;}
+  if(_rheSyncing)return;_rheSyncing=true;
+  try{
+    var dir=await _idbRHE('get');
+    if(!dir){
+      _msgIng('📂 Elige la carpeta de recibos (C:\\Users\\mmontoya\\OneDrive\\Katherine)…');
+      dir=await window.showDirectoryPicker({id:'rheDir',mode:'read'});
+      await _idbRHE('set',dir);
+    }
+    var perm=await dir.queryPermission({mode:'read'});
+    if(perm!=='granted')perm=await dir.requestPermission({mode:'read'});
+    if(perm!=='granted'){_msgIng('⚠ No se concedió acceso a la carpeta.');_rheSyncing=false;return;}
+    _msgIng('⏳ Buscando recibos nuevos en la carpeta…');
+    var r=await _scanDirRHE(dir);
+    _msgIng('✅ Carpeta sincronizada: '+r.nuevos+' nuevo(s), '+r.dup+' ya existían'+(r.err?', '+r.err+' con error/omitido(s)':'')+'.');
+  }catch(e){
+    if(e&&e.name==='AbortError')_msgIng('');/* el usuario canceló el diálogo */
+    else _msgIng('⚠ No se pudo sincronizar: '+(e&&e.message?e.message:e));
+  }
+  _rheSyncing=false;
+}
+async function autoSyncRHE(){
+  /* Se llama al iniciar sesión: si ya hay carpeta recordada y con permiso, carga lo nuevo en silencio. */
+  if(!_fsaDisponible()||_rheSyncing)return;
+  try{
+    var dir=await _idbRHE('get');if(!dir)return;/* aún no se ha conectado ninguna carpeta */
+    var perm=await dir.queryPermission({mode:'read'});
+    if(perm!=='granted'){_msgIng('🔄 Hay recibos por actualizar — pulsa «Actualizar desde carpeta».');return;}
+    _rheSyncing=true;
+    var r=await _scanDirRHE(dir);_rheSyncing=false;
+    if(r.nuevos)_msgIng('✅ '+r.nuevos+' recibo(s) nuevo(s) cargado(s) de la carpeta.');
+  }catch(e){_rheSyncing=false;}
+}
+
 /* ═══════════════════════ GASTOS / EGRESOS ═══════════════════════ */
 var gastoTipo='estudio';
 function egTipoTitulo(t){return t==='estudio'?'🏢 Egresos del Estudio':'👤 Egresos Personales';}
@@ -1881,7 +1979,7 @@ function setGastoTipo(t){
   renderGastos();
 }
 function fillGastoFiltros(){
-  var sc=document.getElementById('gasFCat');if(sc&&sc.options.length<=1){GASTO_CATS.forEach(function(c){sc.innerHTML+='<option value="'+c+'">'+c+'</option>';});}
+  var sc=document.getElementById('gasFCat');if(sc){var cvc=sc.value;sc.innerHTML='<option value="">Todas</option>';allGastoCats().forEach(function(c){sc.innerHTML+='<option value="'+esc(c)+'">'+esc(c)+'</option>';});sc.value=cvc;}
   var years={};DB.gastos.forEach(function(x){var y=(x.fecha||'').slice(0,4);if(y)years[y]=1;});
   var sel=document.getElementById('gasFAnio');var cv=sel.value;sel.innerHTML='<option value="">Todos los años</option>';
   Object.keys(years).sort().reverse().forEach(function(y){sel.innerHTML+='<option value="'+y+'">'+y+'</option>';});sel.value=cv;
@@ -1939,18 +2037,31 @@ function renderGasSemanas(){
   if(!keys.length){tb.innerHTML='<tr><td colspan="3" class="empty">Sin datos</td></tr>';return;}
   keys.forEach(function(k){var tr=document.createElement('tr');tr.innerHTML='<td><strong>'+k.replace('-S',' · Semana ')+'</strong></td><td>'+map[k].n+'</td><td><strong>'+fmtS(map[k].m)+'</strong></td>';tb.appendChild(tr);});
 }
+function allGastoCats(){var all=GASTO_CATS.concat(DB.gastoCats||[]);var seen={},out=[];all.forEach(function(c){if(c&&!seen[c]){seen[c]=1;out.push(c);}});return out;}
+function fillCatSelect(sel,withNueva){if(!sel)return;sel.innerHTML='';allGastoCats().forEach(function(c){sel.innerHTML+='<option value="'+esc(c)+'">'+esc(c)+'</option>';});if(withNueva)sel.innerHTML+='<option value="__nueva__">➕ Nueva categoría…</option>';}
+function gasCatChg(){var es=document.getElementById('gasCat').value==='__nueva__';document.getElementById('gasCatNuevaWrap').style.display=es?'':'none';if(es)setTimeout(function(){document.getElementById('gasCatNueva').focus();},40);}
+function fijarTipoGasto(t){document.getElementById('gasTipo').value=t;document.getElementById('gasTipoLbl').value=(t==='estudio'?'🏢 Estudio':'👤 Personal');}
 function openGasto(id){
-  var sc=document.getElementById('gasCat');if(sc.options.length===0){GASTO_CATS.forEach(function(c){sc.innerHTML+='<option value="'+c+'">'+c+'</option>';});}
+  var sc=document.getElementById('gasCat');fillCatSelect(sc,true);
   document.getElementById('gasFecha').value=today();document.getElementById('gasDesc').value='';document.getElementById('gasMonto').value='';document.getElementById('gasNotas').value='';
-  sc.value=GASTO_CATS[0];document.getElementById('gasTipo').value=gastoTipo;document.getElementById('gasId').value='';document.getElementById('titGasto').textContent='Nuevo Egreso';
-  if(id){var x=DB.gastos.find(function(v){return v.id===id;});if(x){document.getElementById('gasFecha').value=x.fecha||today();document.getElementById('gasTipo').value=x.tipo||'estudio';document.getElementById('gasCat').value=x.categoria||GASTO_CATS[0];document.getElementById('gasDesc').value=x.descripcion||'';document.getElementById('gasMonto').value=x.monto||'';document.getElementById('gasNotas').value=x.notas||'';document.getElementById('gasId').value=x.id;document.getElementById('titGasto').textContent='Modificar Egreso';}}
+  document.getElementById('gasCatNueva').value='';document.getElementById('gasCatNuevaWrap').style.display='none';
+  sc.value=GASTO_CATS[0];fijarTipoGasto(gastoTipo);document.getElementById('gasId').value='';document.getElementById('titGasto').textContent='Nuevo Egreso';
+  if(id){var x=DB.gastos.find(function(v){return v.id===id;});if(x){
+    document.getElementById('gasFecha').value=x.fecha||today();fijarTipoGasto(x.tipo||'estudio');
+    if(x.categoria&&allGastoCats().indexOf(x.categoria)<0){sc.insertBefore(new Option(x.categoria,x.categoria),sc.firstChild);}
+    sc.value=x.categoria||GASTO_CATS[0];
+    document.getElementById('gasDesc').value=x.descripcion||'';document.getElementById('gasMonto').value=x.monto||'';document.getElementById('gasNotas').value=x.notas||'';document.getElementById('gasId').value=x.id;document.getElementById('titGasto').textContent='Modificar Egreso';
+  }}
   openOv('ovGasto');
 }
 function saveGasto(){
   var fecha=document.getElementById('gasFecha').value;if(!fecha){alert('Ingrese la fecha.');return;}
   var monto=num(document.getElementById('gasMonto').value);if(!monto){alert('Ingrese el monto.');return;}
+  var cat=document.getElementById('gasCat').value;
+  if(cat==='__nueva__'){cat=(document.getElementById('gasCatNueva').value||'').trim();if(!cat){alert('Escriba el nombre de la nueva categoría.');return;}
+    if(!DB.gastoCats)DB.gastoCats=[];if(GASTO_CATS.indexOf(cat)<0&&DB.gastoCats.indexOf(cat)<0)DB.gastoCats.push(cat);}
   var id=parseInt(document.getElementById('gasId').value);
-  var obj={fecha:fecha,tipo:document.getElementById('gasTipo').value,categoria:document.getElementById('gasCat').value,descripcion:document.getElementById('gasDesc').value.trim(),monto:monto,notas:document.getElementById('gasNotas').value.trim()};
+  var obj={fecha:fecha,tipo:document.getElementById('gasTipo').value,categoria:cat,descripcion:document.getElementById('gasDesc').value.trim(),monto:monto,notas:document.getElementById('gasNotas').value.trim()};
   if(id){var i=DB.gastos.findIndex(function(v){return v.id===id;});if(i>=0){obj.id=id;DB.gastos[i]=obj;}}else{obj.id=nid(DB.gastos);DB.gastos.push(obj);}
   save();closeOv('ovGasto');renderGastos();
 }
