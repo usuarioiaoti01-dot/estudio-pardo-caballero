@@ -707,7 +707,7 @@ details.legacy summary{cursor:pointer;font-weight:700;color:var(--navy);}
 <!-- Modal Confirmar -->
 <div class="overlay" id="ovConfirm">
   <div class="modal" style="max-width:360px">
-    <div class="mh"><span class="mt" style="color:var(--red)">⚠ Confirmar eliminación</span><button class="x-btn" onclick="closeOv('ovConfirm')">✕</button></div>
+    <div class="mh"><span class="mt" id="cfTitle" style="color:var(--red)">⚠ Confirmar eliminación</span><button class="x-btn" onclick="closeOv('ovConfirm')">✕</button></div>
     <p id="cfMsg" style="margin-bottom:6px;font-size:14px;font-weight:600"></p>
     <p id="cfSub" style="font-size:12px;color:var(--muted)"></p>
     <div class="mf"><button class="btn btn-out" onclick="closeOv('ovConfirm')">Cancelar</button><button class="btn btn-red" id="cfOk">🗑 Eliminar</button></div>
@@ -773,10 +773,15 @@ function mesLabel(k){if(!k)return'—';var p=k.split('-');return MESES_LBL[+p[1]
 var _ovZ=1000;
 function openOv(id){var el=document.getElementById(id);el.style.zIndex=(++_ovZ);el.classList.add('open');}
 function closeOv(id){document.getElementById(id).classList.remove('open');}
-function confirm2(msg,sub,cb,okTxt){
+function confirm2(msg,sub,cb,okTxt,opts){
+  opts=opts||{};var danger=opts.danger!==false;/* por defecto es una acción destructiva (eliminar) */
+  var ttl=document.getElementById('cfTitle');
+  ttl.textContent=opts.title||(danger?'⚠ Confirmar eliminación':'Confirmar');
+  ttl.style.color=danger?'var(--red)':'';
   document.getElementById('cfMsg').textContent=msg;
-  document.getElementById('cfSub').textContent=sub||'Esta acción no se puede deshacer.';
-  var ok=document.getElementById('cfOk');ok.textContent=okTxt||'🗑 Eliminar';
+  document.getElementById('cfSub').textContent=(sub!=null?sub:(danger?'Esta acción no se puede deshacer.':''));
+  var ok=document.getElementById('cfOk');ok.textContent=okTxt||(danger?'🗑 Eliminar':'Confirmar');
+  ok.className='btn '+(danger?'btn-red':'btn-green');
   cfCb=cb;ok.onclick=function(){closeOv('ovConfirm');if(cfCb)cfCb();};
   openOv('ovConfirm');
 }
@@ -1165,7 +1170,7 @@ function ofrecerRecalculo(filtro,donde){
   if(!pend.length)return;
   confirm2('La tarifa '+donde+' cambió. ¿Aplicarla a '+pend.length+' registro(s) de horas aún no liquidados?',
     'Las horas ya liquidadas no se modifican. Si eliges Cancelar, esos registros conservan la tarifa con la que se registraron.',
-    function(){pend.forEach(function(r){var t=tarifaDe(r.actividadId);r.tarifa=t.valor;r.moneda=t.moneda;r.monto=r2(num(r.horas)*t.valor);});save();reRenderActive();},'✔ Aplicar nueva tarifa');
+    function(){pend.forEach(function(r){var t=tarifaDe(r.actividadId);r.tarifa=t.valor;r.moneda=t.moneda;r.monto=r2(num(r.horas)*t.valor);});save();reRenderActive();},'✔ Aplicar nueva tarifa',{title:'Actualizar tarifa',danger:false});
 }
 
 /* ── Consulta RUC (sin cambios de lógica) ── */
@@ -1527,7 +1532,7 @@ function emitirLiquidacion(){
     DB.liquidaciones.push(L);
     regs.forEach(function(r){r.liquidacionId=L.id;});
     save();renderLiquidacion();imprimirLiquidacion(L);
-  },'✔ Emitir');
+  },'✔ Emitir',{title:'Confirmar emisión de liquidación',danger:false});
 }
 function verLiquidacion(id){
   var L=getLiq(id);if(!L)return;
