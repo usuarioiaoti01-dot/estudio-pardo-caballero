@@ -426,6 +426,7 @@ details.legacy summary{cursor:pointer;font-weight:700;color:var(--navy);}
       <button class="sub-tab" id="egTabPersonal" onclick="setGastoTipo('personal',this)">👤 Egresos Personales</button>
     </div>
     <div class="kpi-grid" id="kpiGastos"></div>
+    <div id="gastosDetalle" style="display:none">
     <div class="card">
       <div class="ch">
         <span class="ct" id="gasTitulo">🏢 Egresos del Estudio</span>
@@ -455,15 +456,6 @@ details.legacy summary{cursor:pointer;font-weight:700;color:var(--navy);}
     </div>
     <div class="res-grid">
       <div class="card" style="margin-bottom:0">
-        <div class="ch"><span class="ct">📆 Gastos por Mes</span></div>
-        <div class="tw">
-          <table>
-            <thead><tr><th>Mes</th><th>Registros</th><th>Total (S/)</th></tr></thead>
-            <tbody id="bodyGasMes"></tbody>
-          </table>
-        </div>
-      </div>
-      <div class="card" style="margin-bottom:0">
         <div class="ch"><span class="ct">🗓 Gastos por Semana</span></div>
         <div class="tw">
           <table>
@@ -472,7 +464,17 @@ details.legacy summary{cursor:pointer;font-weight:700;color:var(--navy);}
           </table>
         </div>
       </div>
+      <div class="card" style="margin-bottom:0">
+        <div class="ch"><span class="ct">📆 Gastos por Mes</span></div>
+        <div class="tw">
+          <table>
+            <thead><tr><th>Mes</th><th>Registros</th><th>Total (S/)</th></tr></thead>
+            <tbody id="bodyGasMes"></tbody>
+          </table>
+        </div>
+      </div>
     </div>
+    </div><!-- /gastosDetalle -->
   </div>
 </div><!-- /tab-finanzas -->
 
@@ -1681,14 +1683,17 @@ function showFinSub(sub,btn){
   document.querySelectorAll('#tab-finanzas .sub-tab').forEach(function(e){e.classList.remove('active');});
   document.getElementById('fin-'+sub).classList.add('active');btn.classList.add('active');
   if(sub==='ingresos')renderIngresos();
-  if(sub==='gastos')renderGastos();
+  if(sub==='gastos')initEgresos();
 }
 
 /* ═══════════════════════ INGRESOS (RHE) ═══════════════════════ */
+var ingFiltInit=false;
 function fillIngFiltros(){
   var years={};DB.ingresos.forEach(function(x){var y=(x.fecha||'').slice(0,4);if(y)years[y]=1;});
+  years[today().slice(0,4)]=1; /* el año en curso siempre disponible */
   var sel=document.getElementById('ingFAnio');if(!sel)return;var cv=sel.value;sel.innerHTML='<option value="">Todos los años</option>';
-  Object.keys(years).sort().reverse().forEach(function(y){sel.innerHTML+='<option value="'+y+'">'+y+'</option>';});sel.value=cv;
+  Object.keys(years).sort().reverse().forEach(function(y){sel.innerHTML+='<option value="'+y+'">'+y+'</option>';});
+  if(!ingFiltInit){sel.value=today().slice(0,4);ingFiltInit=true;}else sel.value=cv;
 }
 function ingFiltradas(){
   var lista=[].concat(DB.ingresos);
@@ -1827,11 +1832,23 @@ function importarRHE(input){
 
 /* ═══════════════════════ GASTOS / EGRESOS ═══════════════════════ */
 var gastoTipo='estudio';
+function egTipoTitulo(t){return t==='estudio'?'🏢 Egresos del Estudio':'👤 Egresos Personales';}
+function initEgresos(){
+  /* Muestra solo las dos opciones + tarjetas (de la última opción usada). El detalle aparece al elegir una. */
+  try{gastoTipo=localStorage.getItem('eg_tipo')||'estudio';}catch(e){gastoTipo='estudio';}
+  document.getElementById('egTabEstudio').classList.toggle('active',gastoTipo==='estudio');
+  document.getElementById('egTabPersonal').classList.toggle('active',gastoTipo==='personal');
+  var tt=document.getElementById('gasTitulo');if(tt)tt.textContent=egTipoTitulo(gastoTipo);
+  var det=document.getElementById('gastosDetalle');if(det)det.style.display='none';
+  renderGastos();
+}
 function setGastoTipo(t){
   gastoTipo=t;
+  try{localStorage.setItem('eg_tipo',t);}catch(e){}
   document.getElementById('egTabEstudio').classList.toggle('active',t==='estudio');
   document.getElementById('egTabPersonal').classList.toggle('active',t==='personal');
-  var tt=document.getElementById('gasTitulo');if(tt)tt.textContent=(t==='estudio'?'🏢 Egresos del Estudio':'👤 Egresos Personales');
+  var tt=document.getElementById('gasTitulo');if(tt)tt.textContent=egTipoTitulo(t);
+  var det=document.getElementById('gastosDetalle');if(det)det.style.display='';
   renderGastos();
 }
 function fillGastoFiltros(){
