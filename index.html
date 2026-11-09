@@ -557,12 +557,25 @@ details.legacy summary{cursor:pointer;font-weight:700;color:var(--navy);}
       <div class="fgroup"><label>Correo</label><input type="email" id="cliEmail"></div>
       <div class="fgroup"><label>Teléfono</label><input type="tel" id="cliTel"></div>
       <div class="fgroup"><label>Abogado responsable</label><select id="cliAbogado"></select></div>
+      <div class="fgroup ff"><label>Banco con que trabaja</label><input type="text" id="cliBanco" placeholder="Ej. BCP, Interbank, BBVA, Scotiabank..."></div>
 
       <div class="sec-title">Tarifa y condiciones de cobro</div>
+      <div class="fgroup"><label>Tipo de tarifa *</label>
+        <select id="cliTipoTarifa" onchange="cliTipoTarifaChg()"><option value="horas">⏱ Por hora</option><option value="proyecto">📦 Por proyecto (monto fijo)</option><option value="exito">🏆 Al éxito (monto al completar)</option></select>
+      </div>
       <div class="fgroup"><label>Moneda</label><select id="cliMoneda" onchange="cliEjemplo()"><option value="PEN">Soles (S/)</option><option value="USD">Dólares (US$)</option></select></div>
-      <div class="fgroup"><label>Tarifa por hora *</label><input type="number" id="cliTarifa" min="0" step="0.01" placeholder="0.00" oninput="cliEjemplo()"><span class="help">Se usa en todas sus actividades, salvo que una tenga tarifa especial.</span></div>
-      <div class="ff"><label class="chk"><input type="checkbox" id="cliRet" checked onchange="cliEjemplo()"><span>El cliente retiene el 8% (renta de 4ta categoría)</span></label></div>
-      <div class="ff"><label class="chk"><input type="checkbox" id="cliNeta" onchange="cliEjemplo()"><span>La tarifa pactada es <strong>neta</strong>: el bruto se eleva (÷ 0.92) para que, tras la retención, se cobre exactamente horas × tarifa</span></label></div>
+      <div class="fgroup" id="wrapTarifaHora"><label>Tarifa por hora *</label><input type="number" id="cliTarifa" min="0" step="0.01" placeholder="0.00" oninput="cliEjemplo()"><span class="help">Se usa en todas sus actividades, salvo que una tenga tarifa especial.</span></div>
+      <div class="fgroup" id="wrapMontoProyecto" style="display:none"><label>Monto del proyecto *</label><input type="number" id="cliMontoProyecto" min="0" step="0.01" placeholder="0.00" oninput="cliEjemplo()"><span class="help">Monto total pactado por el proyecto.</span></div>
+      <div class="fgroup" id="wrapMontoExito" style="display:none"><label>Monto al éxito *</label><input type="number" id="cliMontoExito" min="0" step="0.01" placeholder="0.00" oninput="cliEjemplo()"><span class="help">Monto que se obtendrá cuando se complete la tarea.</span></div>
+      <div class="fgroup"><label>Comprobante</label>
+        <select id="cliComprobante" onchange="cliComprobanteChg()"><option value="honorarios">Recibo por Honorarios</option><option value="factura">Factura</option></select>
+      </div>
+      <div class="fgroup"><label>Plazo de pago</label>
+        <select id="cliPlazo"><option value="contado">Al contado</option><option value="15">15 días</option><option value="30">30 días</option><option value="45">45 días</option><option value="60">60 días</option></select>
+      </div>
+      <div class="fgroup ff" id="wrapIncluye8"><label>Retención 8% (renta de 4ta categoría)</label>
+        <select id="cliIncluye8" onchange="cliEjemplo()"><option value="si">La tarifa YA incluye el 8% (se descuenta del monto)</option><option value="no">NO incluye — se eleva ÷ 0.92 para que el cliente reciba el monto completo</option></select>
+      </div>
       <div class="ff"><div class="calc-box" id="cliEjemplo"></div></div>
       <div class="fgroup ff"><label>Notas</label><textarea id="cliNotas" rows="2"></textarea></div>
       <div class="ff"><label class="chk"><input type="checkbox" id="cliActivo" checked><span>Cliente activo</span></label></div>
@@ -866,7 +879,7 @@ function renderInicio(){
   var regsMes=DB.registros.filter(function(r){return mesKey(r.fecha)===mes;});
   var abAct=abogadosActivos().length;
   var cliAct=clientesActivos();
-  var cliSinTar=cliAct.filter(function(c){return !(num(c.tarifaHora)>0);}).length;
+  var cliSinTar=cliAct.filter(function(c){var tt=c.tipoTarifa||'horas';if(tt==='proyecto')return !(num(c.montoProyecto)>0);if(tt==='exito')return !(num(c.montoExito)>0);return !(num(c.tarifaHora)>0);}).length;
   var cliSinAct=cliAct.filter(function(c){return !actsDe(c.id).some(function(a){return a.estado!=='Cerrada';});}).length;
   var cliMes=uniq(regsMes.map(function(r){return r.clienteId;}).filter(Boolean));
   var pendCli=cliMes.filter(function(id){return regsMes.some(function(r){return r.clienteId===id&&!r.liquidacionId;});});
@@ -978,7 +991,10 @@ function renderClientes(){
   tb.innerHTML=lista.map(function(c){
     var acts=actsDe(c.id);var activas=acts.filter(function(a){return a.estado!=='Cerrada';}).length;
     var esp=acts.filter(function(a){return num(a.tarifaHora)>0;}).length;
-    var tar=num(c.tarifaHora)>0?'<strong>'+fmtMoneda(c.tarifaHora,c.moneda)+'</strong>':'<span class="badge b-red">Sin tarifa</span>';
+    var tt=c.tipoTarifa||'horas';var tar;
+    if(tt==='proyecto')tar=(num(c.montoProyecto)>0?'<strong>'+fmtMoneda(c.montoProyecto,c.moneda)+'</strong>':'<span class="badge b-red">Sin monto</span>')+' <span class="badge b-cat">proyecto</span>';
+    else if(tt==='exito')tar=(num(c.montoExito)>0?'<strong>'+fmtMoneda(c.montoExito,c.moneda)+'</strong>':'<span class="badge b-red">Sin monto</span>')+' <span class="badge b-purple">al éxito</span>';
+    else tar=num(c.tarifaHora)>0?'<strong>'+fmtMoneda(c.tarifaHora,c.moneda)+'</strong> <span class="sub">/ h</span>':'<span class="badge b-red">Sin tarifa</span>';
     return '<tr class="'+(c.activo===false?'inactivo':'')+'"><td class="nowrap"><strong>'+esc(c.codigo||'—')+'</strong></td>'+
       '<td class="cli"><strong>'+esc(c.razonSocial)+'</strong>'+(c.ruc?'<br><span class="sub">'+(c.tipo==='persona'?'DNI/RUC ':'RUC ')+esc(c.ruc)+'</span>':'')+'</td>'+
       '<td class="num">'+tar+'</td><td>'+condicionTxt(c)+'</td>'+
@@ -1000,16 +1016,39 @@ function setTipoCliente(tipo){
   document.getElementById('razonLabel').textContent=tipo==='empresa'?'Razón social *':'Nombres y apellidos *';
   document.getElementById('btnConsultaRuc').textContent=tipo==='empresa'?'🔍 Consultar SUNAT':'🔍 Consultar';
 }
-/* Ejemplo didáctico: qué se cobraría por 10 horas con la configuración elegida */
+/* Muestra el campo de monto según el tipo de tarifa elegido */
+function cliTipoTarifaChg(){
+  var tipo=document.getElementById('cliTipoTarifa').value;
+  document.getElementById('wrapTarifaHora').style.display=(tipo==='horas')?'':'none';
+  document.getElementById('wrapMontoProyecto').style.display=(tipo==='proyecto')?'':'none';
+  document.getElementById('wrapMontoExito').style.display=(tipo==='exito')?'':'none';
+  cliEjemplo();
+}
+/* La retención 4ta solo aplica a Recibo por Honorarios; con Factura se oculta la opción del 8% */
+function cliComprobanteChg(){
+  var hon=document.getElementById('cliComprobante').value==='honorarios';
+  document.getElementById('wrapIncluye8').style.display=hon?'':'none';
+  cliEjemplo();
+}
+/* Flags de cálculo derivados de comprobante + «incluye el 8%» (reusados por la liquidación) */
+function cliFlags(){
+  var hon=document.getElementById('cliComprobante').value==='honorarios';
+  var neta=hon && document.getElementById('cliIncluye8').value==='no';
+  return{aplicaRetencion:hon,tarifaNeta:neta};
+}
+/* Ejemplo didáctico del neto a cobrar según el tipo de tarifa y las condiciones */
 function cliEjemplo(){
-  var t=num(document.getElementById('cliTarifa').value);var mon=document.getElementById('cliMoneda').value;
-  var el=document.getElementById('cliEjemplo');
-  if(!(t>0)){el.className='calc-box vacio';el.innerHTML='Ingresa la tarifa por hora para ver un ejemplo de cálculo.';return;}
-  var c=calcTotales(r2(10*t),{aplicaRetencion:document.getElementById('cliRet').checked,tarifaNeta:document.getElementById('cliNeta').checked});
+  var tipo=document.getElementById('cliTipoTarifa').value;var mon=document.getElementById('cliMoneda').value;
+  var el=document.getElementById('cliEjemplo');var base,titulo;
+  if(tipo==='horas'){var t=num(document.getElementById('cliTarifa').value);if(!(t>0)){el.className='calc-box vacio';el.innerHTML='Ingresa la tarifa por hora para ver un ejemplo de cálculo.';return;}base=r2(10*t);titulo='Ejemplo con 10 horas: 10 h × '+fmtMoneda(t,mon)+' = '+fmtMoneda(base,mon);}
+  else if(tipo==='proyecto'){var mp=num(document.getElementById('cliMontoProyecto').value);if(!(mp>0)){el.className='calc-box vacio';el.innerHTML='Ingresa el monto del proyecto para ver el cálculo.';return;}base=r2(mp);titulo='Proyecto: '+fmtMoneda(base,mon);}
+  else{var me=num(document.getElementById('cliMontoExito').value);if(!(me>0)){el.className='calc-box vacio';el.innerHTML='Ingresa el monto al éxito para ver el cálculo.';return;}base=r2(me);titulo='Al éxito (al completar la tarea): '+fmtMoneda(base,mon);}
+  var f=cliFlags();var c=calcTotales(base,f);
   el.className='calc-box';
-  el.innerHTML='<strong>Ejemplo con 10 horas:</strong> 10 h × '+fmtMoneda(t,mon)+' = '+fmtMoneda(c.honorarios,mon)+
+  el.innerHTML='<strong>'+titulo+'</strong>'+
     (c.bruto!==c.honorarios?' → bruto '+fmtMoneda(c.honorarios,mon)+' ÷ 0.92 = <strong>'+fmtMoneda(c.bruto,mon)+'</strong>':'')+
-    ' · Retención: '+fmtMoneda(c.retencion,mon)+' · <strong>Neto a cobrar: '+fmtMoneda(c.neto,mon)+'</strong>';
+    (f.aplicaRetencion?' · Retención 8%: '+fmtMoneda(c.retencion,mon):' · Sin retención (factura)')+
+    ' · <strong>Neto a cobrar: '+fmtMoneda(c.neto,mon)+'</strong>';
 }
 /* ── Alta de cliente por etapas: primero el RUC, luego el resto de los campos ── */
 function cliPaso1(){
@@ -1049,7 +1088,7 @@ function cotejarIngresos(ruc){
 }
 function openCliente(id){
   var c=id?getCli(id):null;
-  ['cliRuc','cliRazon','cliEstado','cliDir','cliContacto','cliEmail','cliTel','cliNotas','cliTarifa'].forEach(function(f){document.getElementById(f).value='';});
+  ['cliRuc','cliRazon','cliEstado','cliDir','cliContacto','cliEmail','cliTel','cliNotas','cliTarifa','cliBanco','cliMontoProyecto','cliMontoExito'].forEach(function(f){document.getElementById(f).value='';});
   document.getElementById('sunatResult').innerHTML='';document.getElementById('linkSunat').style.display='none';
   fillSelect('cliAbogado',abogadosActivos(),'— Sin asignar —');
   setTipoCliente(c?(c.tipo||'empresa'):'empresa');
@@ -1057,34 +1096,49 @@ function openCliente(id){
   document.getElementById('cliId').value=c?c.id:'';
   document.getElementById('cliCodigo').value=c?(c.codigo||''):nextCodigoCliente();
   document.getElementById('cliMoneda').value=c?(c.moneda||'PEN'):'PEN';
-  document.getElementById('cliRet').checked=c?c.aplicaRetencion!==false:true;
-  document.getElementById('cliNeta').checked=c?!!c.tarifaNeta:false;
+  document.getElementById('cliTipoTarifa').value=c?(c.tipoTarifa||'horas'):'horas';
+  document.getElementById('cliComprobante').value=c?(c.comprobante||(c.aplicaRetencion===false?'factura':'honorarios')):'honorarios';
+  var inc8=c?(c.incluye8!=null?(c.incluye8?'si':'no'):(c.tarifaNeta?'no':'si')):'si';
+  document.getElementById('cliIncluye8').value=inc8;
+  document.getElementById('cliPlazo').value=c?(c.plazoPago||'contado'):'contado';
   document.getElementById('cliActivo').checked=c?c.activo!==false:true;
   if(c){
     document.getElementById('cliRuc').value=c.ruc||'';document.getElementById('cliRazon').value=c.razonSocial||'';
     document.getElementById('cliEstado').value=c.estado||'';document.getElementById('cliDir').value=c.direccion||'';
     document.getElementById('cliContacto').value=c.contacto||'';document.getElementById('cliEmail').value=c.email||'';
     document.getElementById('cliTel').value=c.telefono||'';document.getElementById('cliNotas').value=c.notas||'';
+    document.getElementById('cliBanco').value=c.banco||'';
     document.getElementById('cliTarifa').value=num(c.tarifaHora)>0?c.tarifaHora:'';
+    document.getElementById('cliMontoProyecto').value=num(c.montoProyecto)>0?c.montoProyecto:'';
+    document.getElementById('cliMontoExito').value=num(c.montoExito)>0?c.montoExito:'';
     if(c.abogadoId){var s=document.getElementById('cliAbogado');if(!s.querySelector('option[value="'+c.abogadoId+'"]'))s.innerHTML+='<option value="'+c.abogadoId+'">'+esc(nomAb(c.abogadoId))+'</option>';s.value=c.abogadoId;}
   }
-  cliEjemplo();
+  cliTipoTarifaChg();cliComprobanteChg();cliEjemplo();
   if(c)cliMostrarDatos();else cliPaso1();/* al editar se muestran todos los campos; al crear, primero el RUC */
   openOv('ovCliente');
 }
 function saveCliente(){
   var razon=document.getElementById('cliRazon').value.trim();if(!razon){alert('Ingresa el nombre o razón social.');return;}
+  var tipoTarifa=document.getElementById('cliTipoTarifa').value;
   var tarifa=r2(document.getElementById('cliTarifa').value);
-  if(!(tarifa>0)){alert('Ingresa la tarifa por hora del cliente. Es la base para calcular sus liquidaciones.');document.getElementById('cliTarifa').focus();return;}
+  var montoProyecto=r2(document.getElementById('cliMontoProyecto').value);
+  var montoExito=r2(document.getElementById('cliMontoExito').value);
+  if(tipoTarifa==='horas'&&!(tarifa>0)){alert('Ingresa la tarifa por hora del cliente. Es la base para calcular sus liquidaciones.');document.getElementById('cliTarifa').focus();return;}
+  if(tipoTarifa==='proyecto'&&!(montoProyecto>0)){alert('Ingresa el monto del proyecto.');document.getElementById('cliMontoProyecto').focus();return;}
+  if(tipoTarifa==='exito'&&!(montoExito>0)){alert('Ingresa el monto al éxito (el que se obtendrá al completar la tarea).');document.getElementById('cliMontoExito').focus();return;}
   var ruc=document.getElementById('cliRuc').value.trim();
   var id=parseInt(document.getElementById('cliId').value)||0;
   if(ruc&&DB.clientes.some(function(x){return x.id!==id&&x.ruc===ruc;})){alert('Ya existe un cliente con ese RUC/DNI.');return;}
   var prev=id?getCli(id):null;
+  var f=cliFlags();var inc8=document.getElementById('cliIncluye8').value==='si';
   var obj={tipo:document.getElementById('cliTipo').value,ruc:ruc,razonSocial:razon,estado:document.getElementById('cliEstado').value.trim(),
     direccion:document.getElementById('cliDir').value.trim(),contacto:document.getElementById('cliContacto').value.trim(),
     email:document.getElementById('cliEmail').value.trim(),telefono:document.getElementById('cliTel').value.trim(),
+    banco:document.getElementById('cliBanco').value.trim(),
     abogadoId:parseInt(document.getElementById('cliAbogado').value)||null,moneda:document.getElementById('cliMoneda').value,
-    tarifaHora:tarifa,aplicaRetencion:document.getElementById('cliRet').checked,tarifaNeta:document.getElementById('cliNeta').checked,
+    tipoTarifa:tipoTarifa,tarifaHora:tarifa,montoProyecto:montoProyecto,montoExito:montoExito,
+    comprobante:document.getElementById('cliComprobante').value,plazoPago:document.getElementById('cliPlazo').value,incluye8:inc8,
+    aplicaRetencion:f.aplicaRetencion,tarifaNeta:f.tarifaNeta,
     notas:document.getElementById('cliNotas').value.trim(),activo:document.getElementById('cliActivo').checked,
     codigo:(prev&&prev.codigo)||document.getElementById('cliCodigo').value||nextCodigoCliente()};
   if(prev){obj.id=id;DB.clientes[DB.clientes.findIndex(function(x){return x.id===id;})]=obj;}
