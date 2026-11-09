@@ -574,7 +574,7 @@ details.legacy summary{cursor:pointer;font-weight:700;color:var(--navy);}
         <select id="cliPlazo"><option value="contado">Al contado</option><option value="15">15 días</option><option value="30">30 días</option><option value="45">45 días</option><option value="60">60 días</option></select>
       </div>
       <div class="fgroup ff" id="wrapIncluye8"><label>Retención 8% (renta de 4ta categoría)</label>
-        <select id="cliIncluye8" onchange="cliEjemplo()"><option value="si">La tarifa YA incluye el 8% (se descuenta del monto)</option><option value="no">NO incluye — se eleva ÷ 0.92 para que el cliente reciba el monto completo</option></select>
+        <select id="cliIncluye8" onchange="cliEjemplo()"><option value="si">Sí Incluye 8%</option><option value="no">NO Incluye 8%</option></select>
       </div>
       <div class="ff"><div class="calc-box" id="cliEjemplo"></div></div>
       <div class="fgroup ff"><label>Notas</label><textarea id="cliNotas" rows="2"></textarea></div>
@@ -1484,11 +1484,11 @@ function htmlTablaLiquidacion(liq){
   if(liq.tarifaNeta){
     /* La tarifa NO incluye el 8%: el recibo se emite por el bruto y no se muestra la retención */
     h+='<div class="tot-box">'+
-      '<div><span>Honorarios por horas<span class="note">'+fmtNum(liq.totalHoras)+' h según tarifa</span></span><span>'+fmtMoneda(liq.honorarios,mon)+'</span></div>'+
-      '<div class="big"><span>Monto del recibo por honorarios<span class="note">Bruto: '+fmtMoneda(liq.honorarios,mon)+' ÷ 0.92</span></span><span>'+fmtMoneda(liq.bruto,mon)+'</span></div></div>';
+      '<div><span>Honorarios por horas</span><span>'+fmtMoneda(liq.honorarios,mon)+'</span></div>'+
+      '<div class="big"><span>Monto del recibo por honorarios</span><span>'+fmtMoneda(liq.bruto,mon)+'</span></div></div>';
   }else{
     h+='<div class="tot-box">'+
-      '<div><span>Honorarios por horas<span class="note">'+fmtNum(liq.totalHoras)+' h según tarifa</span></span><span>'+fmtMoneda(liq.honorarios,mon)+'</span></div>'+
+      '<div><span>Honorarios por horas</span><span>'+fmtMoneda(liq.honorarios,mon)+'</span></div>'+
       '<div><span>Retención 4ta categoría (8%)'+(liq.aplicaRetencion?'':'<span class="note">No aplica a este cliente</span>')+'</span><span>− '+fmtMoneda(liq.retencion,mon)+'</span></div>'+
       '<div class="big"><span>Neto a pagar</span><span>'+fmtMoneda(liq.neto,mon)+'</span></div></div>';
   }
@@ -1610,7 +1610,7 @@ function imprimirLiquidacion(L){
     '<tfoot><tr><td>TOTAL</td><td class="r">'+fmtNum(L.totalHoras)+'</td><td></td><td class="r">'+fmtMoneda(L.honorarios,mon)+'</td></tr></tfoot></table>'+
     '<div class="tot">'+(L.tarifaNeta?
       '<div><span>Honorarios por horas</span><span>'+fmtMoneda(L.honorarios,mon)+'</span></div>'+
-      '<div class="big"><span>Monto del recibo por honorarios<small>Bruto: honorarios ÷ 0.92</small></span><span>'+fmtMoneda(L.bruto,mon)+'</span></div>'
+      '<div class="big"><span>Monto del recibo por honorarios</span><span>'+fmtMoneda(L.bruto,mon)+'</span></div>'
       :
       '<div><span>Honorarios por horas</span><span>'+fmtMoneda(L.honorarios,mon)+'</span></div>'+
       (L.bruto!==L.honorarios?'<div><span>Total honorarios (bruto)<small>Tarifa neta: honorarios ÷ 0.92</small></span><span>'+fmtMoneda(L.bruto,mon)+'</span></div>':'')+
