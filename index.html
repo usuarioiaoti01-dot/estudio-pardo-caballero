@@ -1481,11 +1481,17 @@ function htmlTablaLiquidacion(liq){
     l.detalle.forEach(function(d){h+='<tr class="det-row"><td>'+fmtDate(d.fecha)+'</td><td>'+esc(d.descripcion||'—')+'</td><td>'+esc(d.abogado)+'</td><td class="num">'+fmtNum(d.horas)+'</td><td></td><td></td></tr>';});
   });
   h+='</tbody><tfoot><tr class="tfoot-row"><td colspan="3">TOTAL</td><td class="num">'+fmtNum(liq.totalHoras)+'</td><td></td><td class="num">'+fmtMoneda(liq.honorarios,mon)+'</td></tr></tfoot></table></div>';
-  h+='<div class="tot-box">'+
-    '<div><span>Honorarios por horas<span class="note">'+fmtNum(liq.totalHoras)+' h según tarifa</span></span><span>'+fmtMoneda(liq.honorarios,mon)+'</span></div>'+
-    (liq.bruto!==liq.honorarios?'<div><span>Total honorarios (bruto)<span class="note">Tarifa neta: '+fmtMoneda(liq.honorarios,mon)+' ÷ 0.92</span></span><span>'+fmtMoneda(liq.bruto,mon)+'</span></div>':'')+
-    '<div><span>Retención 4ta categoría (8%)'+(liq.aplicaRetencion?'':'<span class="note">No aplica a este cliente</span>')+'</span><span>− '+fmtMoneda(liq.retencion,mon)+'</span></div>'+
-    '<div class="big"><span>Neto a pagar</span><span>'+fmtMoneda(liq.neto,mon)+'</span></div></div>';
+  if(liq.tarifaNeta){
+    /* La tarifa NO incluye el 8%: el recibo se emite por el bruto y no se muestra la retención */
+    h+='<div class="tot-box">'+
+      '<div><span>Honorarios por horas<span class="note">'+fmtNum(liq.totalHoras)+' h según tarifa</span></span><span>'+fmtMoneda(liq.honorarios,mon)+'</span></div>'+
+      '<div class="big"><span>Monto del recibo por honorarios<span class="note">Bruto: '+fmtMoneda(liq.honorarios,mon)+' ÷ 0.92</span></span><span>'+fmtMoneda(liq.bruto,mon)+'</span></div></div>';
+  }else{
+    h+='<div class="tot-box">'+
+      '<div><span>Honorarios por horas<span class="note">'+fmtNum(liq.totalHoras)+' h según tarifa</span></span><span>'+fmtMoneda(liq.honorarios,mon)+'</span></div>'+
+      '<div><span>Retención 4ta categoría (8%)'+(liq.aplicaRetencion?'':'<span class="note">No aplica a este cliente</span>')+'</span><span>− '+fmtMoneda(liq.retencion,mon)+'</span></div>'+
+      '<div class="big"><span>Neto a pagar</span><span>'+fmtMoneda(liq.neto,mon)+'</span></div></div>';
+  }
   return h;
 }
 var preCliId=null;
@@ -1602,10 +1608,15 @@ function imprimirLiquidacion(L){
     '<div><strong>Fecha de emisión:</strong> '+fmtDate(L.fechaEmision)+'</div><div><strong>Moneda:</strong> '+(mon==='USD'?'Dólares americanos':'Soles')+'</div></div>'+
     '<h3>1. Resumen por actividad</h3><table><thead><tr><th>Actividad</th><th class="r">Horas</th><th class="r">Tarifa / hora</th><th class="r">Importe</th></tr></thead><tbody>'+resumen+'</tbody>'+
     '<tfoot><tr><td>TOTAL</td><td class="r">'+fmtNum(L.totalHoras)+'</td><td></td><td class="r">'+fmtMoneda(L.honorarios,mon)+'</td></tr></tfoot></table>'+
-    '<div class="tot"><div><span>Honorarios por horas</span><span>'+fmtMoneda(L.honorarios,mon)+'</span></div>'+
-    (L.bruto!==L.honorarios?'<div><span>Total honorarios (bruto)<small>Tarifa neta: honorarios ÷ 0.92</small></span><span>'+fmtMoneda(L.bruto,mon)+'</span></div>':'')+
-    '<div><span>Retención 4ta categoría (8%)</span><span>− '+fmtMoneda(L.retencion,mon)+'</span></div>'+
-    '<div class="big"><span>Neto a pagar</span><span>'+fmtMoneda(L.neto,mon)+'</span></div></div>'+
+    '<div class="tot">'+(L.tarifaNeta?
+      '<div><span>Honorarios por horas</span><span>'+fmtMoneda(L.honorarios,mon)+'</span></div>'+
+      '<div class="big"><span>Monto del recibo por honorarios<small>Bruto: honorarios ÷ 0.92</small></span><span>'+fmtMoneda(L.bruto,mon)+'</span></div>'
+      :
+      '<div><span>Honorarios por horas</span><span>'+fmtMoneda(L.honorarios,mon)+'</span></div>'+
+      (L.bruto!==L.honorarios?'<div><span>Total honorarios (bruto)<small>Tarifa neta: honorarios ÷ 0.92</small></span><span>'+fmtMoneda(L.bruto,mon)+'</span></div>':'')+
+      '<div><span>Retención 4ta categoría (8%)</span><span>− '+fmtMoneda(L.retencion,mon)+'</span></div>'+
+      '<div class="big"><span>Neto a pagar</span><span>'+fmtMoneda(L.neto,mon)+'</span></div>'
+    )+'</div>'+
     '<h3>2. Detalle de horas trabajadas</h3><table><thead><tr><th class="c">Fecha</th><th>Actividad</th><th>Descripción</th><th>Abogado</th><th class="r">Tiempo</th></tr></thead><tbody>'+detalle+'</tbody>'+
     '<tfoot><tr><td colspan="4" class="r">TOTAL</td><td class="r">'+fmtHM(L.totalHoras)+'</td></tr></tfoot></table>'+
     '<div class="firma"><div>Elaborado por</div><div>Conformidad del cliente</div></div></body></html>';
