@@ -1038,16 +1038,14 @@ function cliPaso2(sinRuc){
   cliMostrarDatos();
 }
 function cotejarIngresos(ruc){
-  var box=document.getElementById('cliCotejo');
+  document.getElementById('cliCotejo').innerHTML='';
   var m=DB.ingresos.find(function(x){return x.ruc&&x.ruc===ruc;});
   if(m){
+    /* encontrado en los recibos: autocompleta razón social y marca el estado */
     if(!document.getElementById('cliRazon').value)document.getElementById('cliRazon').value=m.cliente||'';
-    var n=DB.ingresos.filter(function(x){return x.ruc===ruc;}).length;
-    box.innerHTML='<div class="sunat-result"><div class="sunat-row"><span class="sunat-lbl">✔ Encontrado en Ingresos:</span><span class="sunat-val"><strong>'+esc(m.cliente||'')+'</strong></span></div>'+
-      '<div style="font-size:12px;color:var(--muted);margin-top:4px">Se completó la razón social desde tus recibos ('+n+' recibo(s) con este RUC). Revisa y completa los demás datos; puedes usar 🔍 Consultar SUNAT si lo necesitas.</div></div>';
-  }else{
-    box.innerHTML='<div style="font-size:12px;color:var(--muted)">No hay recibos con ese RUC en Ingresos. Completa los datos manualmente o usa 🔍 Consultar SUNAT.</div>';
+    if(!document.getElementById('cliEstado').value)document.getElementById('cliEstado').value='Activo / Habido';
   }
+  /* si NO está en los recibos, el estado queda vacío: se obtiene con 🔍 Consultar SUNAT o se ingresa a mano */
 }
 function openCliente(id){
   var c=id?getCli(id):null;
@@ -1423,12 +1421,12 @@ function renderLiquidacion(){
   renderLiqEmitidas();renderLiqLegacy();
 }
 function htmlTablaLiquidacion(liq){
-  var mon=liq.moneda;var h='<div class="tw"><table><thead><tr><th>Actividad / detalle</th><th>Abogado</th><th class="num">Horas</th><th class="num">Tarifa / h</th><th class="num">Importe</th></tr></thead><tbody>';
+  var mon=liq.moneda;var h='<div class="tw"><table><thead><tr><th>Actividad / fecha</th><th>Descripción</th><th>Abogado</th><th class="num">Horas</th><th class="num">Tarifa / h</th><th class="num">Importe</th></tr></thead><tbody>';
   liq.lineas.forEach(function(l){
-    h+='<tr class="act-row"><td>'+esc(l.actividad)+'</td><td></td><td class="num">'+fmtNum(l.horas)+'</td><td class="num">'+fmtMoneda(l.tarifa,mon)+'</td><td class="num">'+fmtMoneda(l.importe,mon)+'</td></tr>';
-    l.detalle.forEach(function(d){h+='<tr class="det-row"><td>'+fmtDate(d.fecha)+(d.descripcion?' — '+esc(d.descripcion):'')+'</td><td>'+esc(d.abogado)+'</td><td class="num">'+fmtNum(d.horas)+'</td><td></td><td></td></tr>';});
+    h+='<tr class="act-row"><td><strong>'+esc(l.actividad)+'</strong></td><td></td><td></td><td class="num">'+fmtNum(l.horas)+'</td><td class="num">'+fmtMoneda(l.tarifa,mon)+'</td><td class="num">'+fmtMoneda(l.importe,mon)+'</td></tr>';
+    l.detalle.forEach(function(d){h+='<tr class="det-row"><td>'+fmtDate(d.fecha)+'</td><td>'+esc(d.descripcion||'—')+'</td><td>'+esc(d.abogado)+'</td><td class="num">'+fmtNum(d.horas)+'</td><td></td><td></td></tr>';});
   });
-  h+='</tbody><tfoot><tr class="tfoot-row"><td colspan="2">TOTAL</td><td class="num">'+fmtNum(liq.totalHoras)+'</td><td></td><td class="num">'+fmtMoneda(liq.honorarios,mon)+'</td></tr></tfoot></table></div>';
+  h+='</tbody><tfoot><tr class="tfoot-row"><td colspan="3">TOTAL</td><td class="num">'+fmtNum(liq.totalHoras)+'</td><td></td><td class="num">'+fmtMoneda(liq.honorarios,mon)+'</td></tr></tfoot></table></div>';
   h+='<div class="tot-box">'+
     '<div><span>Honorarios por horas<span class="note">'+fmtNum(liq.totalHoras)+' h según tarifa</span></span><span>'+fmtMoneda(liq.honorarios,mon)+'</span></div>'+
     (liq.bruto!==liq.honorarios?'<div><span>Total honorarios (bruto)<span class="note">Tarifa neta: '+fmtMoneda(liq.honorarios,mon)+' ÷ 0.92</span></span><span>'+fmtMoneda(liq.bruto,mon)+'</span></div>':'')+
