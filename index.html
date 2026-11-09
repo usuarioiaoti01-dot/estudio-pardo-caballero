@@ -160,7 +160,11 @@ details.legacy summary{cursor:pointer;font-weight:700;color:var(--navy);}
 .hint{font-size:12px;color:var(--muted);background:#f8fafc;border:1px dashed var(--border);border-radius:6px;padding:9px 11px;margin-bottom:12px;line-height:1.55;}
 .paso{display:inline-block;background:var(--navy);color:#fff;border-radius:10px;padding:1px 8px;font-size:11px;font-weight:800;margin-right:6px;}
 .import-msg{font-size:12px;font-weight:700;margin-top:8px;color:var(--navy);}
-#fin-ingresos table.wide{min-width:1180px;}
+#fin-ingresos table.wide{width:100%;min-width:0;}
+#fin-ingresos table.wide td.desc{max-width:150px;}
+#fin-ingresos table.wide td.cli{min-width:150px;}
+.pager{display:flex;align-items:center;justify-content:center;gap:10px;padding:10px 0 2px;flex-wrap:wrap;}
+.pager .pg-info{font-size:13px;color:var(--muted);}
 .port-bar{background:var(--navy-lt);color:#fff;padding:8px 20px;display:flex;align-items:center;gap:14px;font-size:12px;flex-wrap:wrap;}
 .port-bar .port-msg{flex:1;opacity:.8;min-width:220px;}
 .backup-info{font-weight:600;white-space:nowrap;}
@@ -381,20 +385,20 @@ details.legacy summary{cursor:pointer;font-weight:700;color:var(--navy);}
       </div>
       <div id="ingImportMsg" class="import-msg"></div>
       <div class="fgr">
-        <div class="fgroup"><label>Año</label><select id="ingFAnio" onchange="renderIngresos()"><option value="">Todos los años</option></select></div>
+        <div class="fgroup"><label>Año</label><select id="ingFAnio" onchange="ingFiltChg()"><option value="">Todos los años</option></select></div>
         <div class="fgroup"><label>Mes</label>
-          <select id="ingFMes" onchange="renderIngresos()">
+          <select id="ingFMes" onchange="ingFiltChg()">
             <option value="">Todos</option><option value="01">Enero</option><option value="02">Febrero</option><option value="03">Marzo</option><option value="04">Abril</option><option value="05">Mayo</option><option value="06">Junio</option><option value="07">Julio</option><option value="08">Agosto</option><option value="09">Setiembre</option><option value="10">Octubre</option><option value="11">Noviembre</option><option value="12">Diciembre</option>
           </select>
         </div>
-        <div class="fgroup"><label>Cliente / RUC</label><input type="text" id="ingFCli" placeholder="Buscar..." oninput="renderIngresos()"></div>
+        <div class="fgroup"><label>Cliente / RUC</label><input type="text" id="ingFCli" placeholder="Buscar..." oninput="ingFiltChg()"></div>
         <div class="fgroup"><label>Moneda</label>
-          <select id="ingFMoneda" onchange="renderIngresos()">
+          <select id="ingFMoneda" onchange="ingFiltChg()">
             <option value="">Todas</option><option value="PEN">Soles (S/)</option><option value="USD">Dólares (US$)</option>
           </select>
         </div>
         <div class="fgroup"><label>Estado</label>
-          <select id="ingFEstado" onchange="renderIngresos()">
+          <select id="ingFEstado" onchange="ingFiltChg()">
             <option value="">Todos</option><option value="Emitido">Emitido</option><option value="Pagado">Pagado</option><option value="Pendiente">Pendiente</option><option value="Revertido">Revertido</option>
           </select>
         </div>
@@ -407,6 +411,7 @@ details.legacy summary{cursor:pointer;font-weight:700;color:var(--navy);}
           <tfoot id="footIng"></tfoot>
         </table>
       </div>
+      <div id="ingPager" class="pager"></div>
     </div>
     <div class="card">
       <div class="ch"><span class="ct">📆 Resumen de Ingresos por Mes</span></div>
@@ -1709,15 +1714,22 @@ function ingFiltradas(){
   return lista;
 }
 function badgeEstadoIng(e){e=e||'Emitido';var c='b-green';var l=e.toLowerCase();if(l.indexOf('revert')>=0)c='b-red';else if(l.indexOf('pend')>=0)c='b-amber';else if(l.indexOf('pag')>=0)c='b-hora';return'<span class="badge '+c+'">'+esc(e)+'</span>';}
+var ingPage=1;var ING_POR_PAG=10;
+function ingFiltChg(){ingPage=1;renderIngresos();}
 function renderIngresos(){
   fillIngFiltros();
   var lista=ingFiltradas();
   var tb=document.getElementById('bodyIng');tb.innerHTML='';
   var pen={b:0,r:0,n:0,c:0},usd={b:0,r:0,n:0,c:0};
+  /* Totales (KPIs + pie) sobre TODA la lista filtrada */
+  lista.forEach(function(x){if(esRevertido(x))return;var t=(x.moneda==='USD')?usd:pen;t.b+=num(x.bruto);t.r+=num(x.retencion);t.n+=num(x.neto);t.c++;});
+  /* Paginación: 10 más recientes por página */
+  var totPag=Math.max(1,Math.ceil(lista.length/ING_POR_PAG));
+  if(ingPage>totPag)ingPage=totPag;if(ingPage<1)ingPage=1;
+  var ini=(ingPage-1)*ING_POR_PAG;var pagina=lista.slice(ini,ini+ING_POR_PAG);
   if(!lista.length){tb.innerHTML='<tr><td colspan="10" class="empty">No hay ingresos. Usa «Importar recibos XML» o «Nuevo ingreso».</td></tr>';}
-  else lista.forEach(function(x){
+  else pagina.forEach(function(x){
     var rev=esRevertido(x);var esUsd=(x.moneda==='USD');
-    if(!rev){var t=esUsd?usd:pen;t.b+=num(x.bruto);t.r+=num(x.retencion);t.n+=num(x.neto);t.c++;}
     var tr=document.createElement('tr');if(rev)tr.style.opacity='.5';
     tr.innerHTML='<td class="nowrap"><strong>'+esc(x.numero||'—')+'</strong></td>'+
       '<td class="nowrap">'+fmtDate(x.fecha)+'</td>'+
@@ -1733,15 +1745,24 @@ function renderIngresos(){
   if(pen.c)fr+='<tr class="tfoot-row"><td colspan="4"><strong>TOTAL Soles — '+pen.c+' recibo(s)</strong></td><td class="num"><strong>'+fmtMoneda(pen.b,'PEN')+'</strong></td><td class="num"><strong>'+fmtMoneda(pen.r,'PEN')+'</strong></td><td class="num"><strong>'+fmtMoneda(pen.n,'PEN')+'</strong></td><td colspan="3"></td></tr>';
   if(usd.c)fr+='<tr class="tfoot-row"><td colspan="4"><strong>TOTAL Dólares — '+usd.c+' recibo(s)</strong></td><td class="num"><strong>'+fmtMoneda(usd.b,'USD')+'</strong></td><td class="num"><strong>'+fmtMoneda(usd.r,'USD')+'</strong></td><td class="num"><strong>'+fmtMoneda(usd.n,'USD')+'</strong></td><td colspan="3"></td></tr>';
   document.getElementById('footIng').innerHTML=fr;
-  var g={PEN:{b:0,n:0},USD:{b:0,n:0}};
-  DB.ingresos.filter(function(x){return !esRevertido(x);}).forEach(function(x){var k=(x.moneda==='USD')?'USD':'PEN';g[k].b+=num(x.bruto);g[k].n+=num(x.neto);});
   document.getElementById('kpiIngresos').innerHTML=
-    kpi('🧾','Recibos',DB.ingresos.length)+
-    kpi('💵','Neto Soles',fmtMoneda(g.PEN.n,'PEN'))+
-    kpi('💰','Bruto Soles',fmtMoneda(g.PEN.b,'PEN'))+
-    kpi('💵','Neto Dólares',fmtMoneda(g.USD.n,'USD'))+
-    kpi('💰','Bruto Dólares',fmtMoneda(g.USD.b,'USD'));
+    kpi('🧾','Recibos',pen.c+usd.c)+
+    kpi('💵','Neto Soles',fmtMoneda(pen.n,'PEN'))+
+    kpi('💰','Bruto Soles',fmtMoneda(pen.b,'PEN'))+
+    kpi('💵','Neto Dólares',fmtMoneda(usd.n,'USD'))+
+    kpi('💰','Bruto Dólares',fmtMoneda(usd.b,'USD'));
+  renderIngPager(lista.length,totPag);
   renderIngMeses();
+}
+function irIngPage(p){ingPage=p;renderIngresos();}
+function renderIngPager(total,totPag){
+  var el=document.getElementById('ingPager');if(!el)return;
+  if(total<=ING_POR_PAG){el.innerHTML='';return;}
+  var ini=(ingPage-1)*ING_POR_PAG+1,fin=Math.min(ingPage*ING_POR_PAG,total);
+  el.innerHTML=
+    '<button class="btn btn-out btn-sm" '+(ingPage<=1?'disabled':'')+' onclick="irIngPage('+(ingPage-1)+')">‹ Anteriores</button>'+
+    '<span class="pg-info">'+ini+'–'+fin+' de '+total+'  ·  pág. '+ingPage+'/'+totPag+'</span>'+
+    '<button class="btn btn-out btn-sm" '+(ingPage>=totPag?'disabled':'')+' onclick="irIngPage('+(ingPage+1)+')">Siguientes ›</button>';
 }
 function renderIngMeses(){
   var map={};
@@ -1750,11 +1771,19 @@ function renderIngMeses(){
   if(!keys.length){tb.innerHTML='<tr><td colspan="4" class="empty">Sin datos</td></tr>';return;}
   keys.forEach(function(k){var d=map[k];var tr=document.createElement('tr');tr.innerHTML='<td><strong>'+mesLabel(k)+'</strong></td><td class="num">'+d.n+'</td><td class="num">'+(d.penN?fmtMoneda(d.penN,'PEN'):'—')+'</td><td class="num">'+(d.usdN?fmtMoneda(d.usdN,'USD'):'—')+'</td>';tb.appendChild(tr);});
 }
+function lockCamposIngreso(lock){
+  ['ingNumero','ingFecha','ingRuc','ingCliente','ingDesc','ingBruto','ingRet','ingMoneda'].forEach(function(f){
+    var e=document.getElementById(f);if(!e)return;e.disabled=lock;
+    e.style.background=lock?'#f0f4f8':'';e.style.color=lock?'var(--muted)':'';
+  });
+}
 function openIngreso(id){
   ['ingNumero','ingRuc','ingCliente','ingDesc','ingBruto','ingRet','ingNeto','ingNotas'].forEach(function(f){document.getElementById(f).value='';});
   document.getElementById('ingFecha').value=today();
   document.getElementById('ingEstado').value='Emitido';document.getElementById('ingMoneda').value='PEN';
   document.getElementById('ingId').value='';document.getElementById('titIngreso').textContent='Nuevo Ingreso';
+  /* Al MODIFICAR solo se editan Estado y Notas; lo demás queda fijo */
+  lockCamposIngreso(!!id);
   if(id){var x=DB.ingresos.find(function(v){return v.id===id;});if(x){
     document.getElementById('ingNumero').value=x.numero||'';document.getElementById('ingFecha').value=x.fecha||today();
     document.getElementById('ingRuc').value=x.ruc||'';document.getElementById('ingCliente').value=x.cliente||'';
@@ -1778,7 +1807,7 @@ function saveIngreso(){
   save();closeOv('ovIngreso');renderIngresos();
 }
 function delIngreso(id){var x=DB.ingresos.find(function(v){return v.id===id;});confirm2('¿Borrar el ingreso "'+((x&&x.numero)||'')+'"?','',function(){DB.ingresos=DB.ingresos.filter(function(v){return v.id!==id;});save();renderIngresos();});}
-function limpFiltIng(){['ingFAnio','ingFMes','ingFCli','ingFMoneda','ingFEstado'].forEach(function(f){document.getElementById(f).value='';});renderIngresos();}
+function limpFiltIng(){['ingFAnio','ingFMes','ingFCli','ingFMoneda','ingFEstado'].forEach(function(f){document.getElementById(f).value='';});ingPage=1;renderIngresos();}
 function exportIngCSV(){
   var rows=[['Numero','Fecha','RUC','Cliente','Descripcion','Bruto','Retencion','Neto','Moneda','Estado','Origen']];
   ingFiltradas().forEach(function(x){rows.push([x.numero||'',fmtDate(x.fecha),x.ruc||'',x.cliente||'',x.descripcion||'',x.bruto,x.retencion,x.neto,x.moneda||'PEN',x.estado||'Emitido',x.origen||'manual']);});
