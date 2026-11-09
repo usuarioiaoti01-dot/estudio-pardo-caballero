@@ -541,8 +541,13 @@ details.legacy summary{cursor:pointer;font-weight:700;color:var(--navy);}
         <a id="linkSunat" href="#" target="_blank" rel="noopener" style="display:none"><button type="button" class="btn btn-out btn-sm">🌐 Abrir SUNAT</button></a>
       </div>
       <div id="sunatResult"></div>
+      <div id="cliCotejo"></div>
+      <div id="cliRucActions" style="margin-top:12px;display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+        <button class="btn btn-navy" onclick="cliPaso2()">Continuar →</button>
+        <a href="#" onclick="cliPaso2(true);return false;" style="font-size:12px;color:var(--muted)">Continuar sin RUC</a>
+      </div>
     </div>
-    <div class="fg">
+    <div class="fg" id="cliDatos">
       <div class="sec-title">Datos del cliente</div>
       <div class="fgroup ff"><label id="razonLabel">Razón social *</label><input type="text" id="cliRazon" placeholder="Nombre o razón social"></div>
       <div class="fgroup"><label>Código</label><input type="text" id="cliCodigo" readonly placeholder="(automático)"></div>
@@ -563,7 +568,7 @@ details.legacy summary{cursor:pointer;font-weight:700;color:var(--navy);}
       <div class="ff"><label class="chk"><input type="checkbox" id="cliActivo" checked><span>Cliente activo</span></label></div>
     </div>
     <input type="hidden" id="cliId"><input type="hidden" id="cliTipo" value="empresa">
-    <div class="mf"><button class="btn btn-out" onclick="closeOv('ovCliente')">Cancelar</button><button class="btn btn-navy" onclick="saveCliente()">💾 Guardar</button></div>
+    <div class="mf"><button class="btn btn-out" onclick="closeOv('ovCliente')">Cancelar</button><button class="btn btn-navy" id="btnGuardarCli" onclick="saveCliente()">💾 Guardar</button></div>
   </div>
 </div>
 
@@ -1006,6 +1011,44 @@ function cliEjemplo(){
     (c.bruto!==c.honorarios?' → bruto '+fmtMoneda(c.honorarios,mon)+' ÷ 0.92 = <strong>'+fmtMoneda(c.bruto,mon)+'</strong>':'')+
     ' · Retención: '+fmtMoneda(c.retencion,mon)+' · <strong>Neto a cobrar: '+fmtMoneda(c.neto,mon)+'</strong>';
 }
+/* ── Alta de cliente por etapas: primero el RUC, luego el resto de los campos ── */
+function cliPaso1(){
+  document.getElementById('cliDatos').style.display='none';
+  document.getElementById('btnGuardarCli').style.display='none';
+  document.getElementById('cliRucActions').style.display='';
+  document.getElementById('cliCotejo').innerHTML='';
+  setTimeout(function(){var r=document.getElementById('cliRuc');if(r)r.focus();},60);
+}
+function cliMostrarDatos(){
+  document.getElementById('cliDatos').style.display='';
+  document.getElementById('btnGuardarCli').style.display='';
+  document.getElementById('cliRucActions').style.display='none';
+}
+function cliPaso2(sinRuc){
+  var tipo=document.getElementById('cliTipo').value;
+  var ruc=document.getElementById('cliRuc').value.trim();
+  if(!sinRuc){
+    if(!ruc){alert('Ingresa el RUC'+(tipo==='persona'?' o DNI':'')+' para continuar, o usa «Continuar sin RUC».');return;}
+    if(tipo==='empresa'&&ruc.length!==11){alert('El RUC de una empresa debe tener 11 dígitos.');return;}
+    if(tipo==='persona'&&ruc.length!==8&&ruc.length!==11){alert('Ingresa un DNI (8 dígitos) o un RUC (11 dígitos).');return;}
+    var dup=DB.clientes.find(function(x){return x.ruc&&x.ruc===ruc;});
+    if(dup){alert('Ya existe un cliente con ese '+(ruc.length===8?'DNI':'RUC')+': «'+dup.razonSocial+'» ('+(dup.codigo||'')+').');return;}
+    cotejarIngresos(ruc);
+  }
+  cliMostrarDatos();
+}
+function cotejarIngresos(ruc){
+  var box=document.getElementById('cliCotejo');
+  var m=DB.ingresos.find(function(x){return x.ruc&&x.ruc===ruc;});
+  if(m){
+    if(!document.getElementById('cliRazon').value)document.getElementById('cliRazon').value=m.cliente||'';
+    var n=DB.ingresos.filter(function(x){return x.ruc===ruc;}).length;
+    box.innerHTML='<div class="sunat-result"><div class="sunat-row"><span class="sunat-lbl">✔ Encontrado en Ingresos:</span><span class="sunat-val"><strong>'+esc(m.cliente||'')+'</strong></span></div>'+
+      '<div style="font-size:12px;color:var(--muted);margin-top:4px">Se completó la razón social desde tus recibos ('+n+' recibo(s) con este RUC). Revisa y completa los demás datos; puedes usar 🔍 Consultar SUNAT si lo necesitas.</div></div>';
+  }else{
+    box.innerHTML='<div style="font-size:12px;color:var(--muted)">No hay recibos con ese RUC en Ingresos. Completa los datos manualmente o usa 🔍 Consultar SUNAT.</div>';
+  }
+}
 function openCliente(id){
   var c=id?getCli(id):null;
   ['cliRuc','cliRazon','cliEstado','cliDir','cliContacto','cliEmail','cliTel','cliNotas','cliTarifa'].forEach(function(f){document.getElementById(f).value='';});
@@ -1028,6 +1071,7 @@ function openCliente(id){
     if(c.abogadoId){var s=document.getElementById('cliAbogado');if(!s.querySelector('option[value="'+c.abogadoId+'"]'))s.innerHTML+='<option value="'+c.abogadoId+'">'+esc(nomAb(c.abogadoId))+'</option>';s.value=c.abogadoId;}
   }
   cliEjemplo();
+  if(c)cliMostrarDatos();else cliPaso1();/* al editar se muestran todos los campos; al crear, primero el RUC */
   openOv('ovCliente');
 }
 function saveCliente(){
@@ -1094,6 +1138,7 @@ function consultarRUC(){
     .finally(function(){document.getElementById('btnConsultaRuc').disabled=false;});
 }
 function aplicarDatosSunat(razon,estado,dir){
+  cliMostrarDatos();/* si aún estábamos en la etapa del RUC, se revelan los campos */
   document.getElementById('cliRazon').value=razon;document.getElementById('cliEstado').value=estado;document.getElementById('cliDir').value=dir;
   document.getElementById('sunatResult').innerHTML='<div class="sunat-result"><div class="sunat-row"><span class="sunat-lbl">📋 Razón social:</span><span class="sunat-val"><strong>'+esc(razon)+'</strong></span></div>'+
     '<div class="sunat-row"><span class="sunat-lbl">✅ Estado:</span><span class="sunat-val">'+esc(estado)+'</span></div>'+(dir?'<div class="sunat-row"><span class="sunat-lbl">📍 Dirección:</span><span class="sunat-val">'+esc(dir)+'</span></div>':'')+'</div>';
